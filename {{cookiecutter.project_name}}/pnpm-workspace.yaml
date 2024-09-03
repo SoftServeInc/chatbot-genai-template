@@ -1,0 +1,6 @@
+packages:
+  - 'apps/*'
+  - 'libs/*'
+  {%- if cookiecutter.terraform_cloud_provider != "none" %}
+  - 'terraform'
+  {%- endif %}

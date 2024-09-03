@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "parallel": 5,
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "!{projectRoot}/**/*.md", "!{projectRoot}/**/*.tsbuildinfo"],
+    "prettier": ["{workspaceRoot}/.prettierrc", "{workspaceRoot}/.prettierignore"],
+    "test": [
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/package.json",
+      "!{projectRoot}/**/?(*.).stories.[jt]s?(x)?"
+    ],
+    "production": [
+      "default",
+
+      "!{projectRoot}/**/?(*.)+.(spec|test|stories).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/**/(stubs|mocks)/**/*",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/.eslintrc.js",
+      "!{projectRoot}/eslint.config.js"
+    ]
+  },
+  "targetDefaults": {
+    "clean": {
+      "cache": false
+    },
+    "build": {
+      "cache": true,
+      "dependsOn": ["clean", "^build"],
+      "inputs": ["production", "^production"],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["test"],
+      "outputs": []
+    },
+    "test:coverage": {
+      "cache": true,
+      "inputs": ["test"],
+      "outputs": ["{projectRoot}/coverage"]
+    },
+    "lint": {
+      "cache": true,
+      "inputs": ["default", "prettier"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": true,
+      "inputs": ["default", "prettier"],
+      "outputs": []
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "start:dev": {
+      "dependsOn": ["clean"],
+      "cache": false
+    }
+  }
+}

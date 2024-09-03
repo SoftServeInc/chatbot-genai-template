@@ -1,0 +1,14 @@
+.authCard {
+    height: 26.25rem;
+    padding: 2.56rem;
+    box-shadow: 0 24px 60px 0 rgba(0, 0, 0, 0.10);
+    transition: width 0.25s ease;
+
+    form {
+        padding: 0 3.25rem;
+    }
+
+    footer {
+        text-align: center;
+    }
+}

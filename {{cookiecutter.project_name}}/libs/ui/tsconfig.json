@@ -1,0 +1,12 @@
+{
+  "extends": "config/typescript/react.json",
+  "include": [
+    "src",
+    ".storybook/stubs"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["@testing-library/jest-dom"]
+  }
+}
+

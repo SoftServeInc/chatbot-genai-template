@@ -1,0 +1,70 @@
+version: "3.9"
+name: "{{ cookiecutter.__api_docker_compose_name }}"
+
+services:
+  database:
+    image: {{ 'pgvector/pgvector:0.6.0-pg16' if cookiecutter.enable_pgvector else 'postgres:16.1-bookworm' }}
+    container_name: {{ cookiecutter.__api_docker_compose_name }}-database
+    restart: always
+    user: postgres
+    environment:
+      POSTGRES_DB: {{ cookiecutter.database_name }}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./docker-compose.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  {%- if cookiecutter.auth == "keycloak" %}
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    container_name: {{ cookiecutter.__api_docker_compose_name }}-keycloak
+    restart: always
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_SCHEMA: keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_DB_URL: "jdbc:postgresql://database:5432/{{ cookiecutter.database_name }}"
+      KC_LOG_LEVEL: INFO
+      KC_PROXY: edge
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      AUTH_KEYCLOAK_REALM_NAME: "${AUTH_KEYCLOAK_REALM_NAME}"
+      AUTH_KEYCLOAK_CLIENT_ID: "${AUTH_KEYCLOAK_CLIENT_ID}"
+      AUTH_KEYCLOAK_CLIENT_SECRET: "${AUTH_KEYCLOAK_CLIENT_SECRET}"
+    ports:
+      - 8000:8080
+    volumes:
+      - ./docker-compose.keycloak-realm.json:/opt/keycloak/data/import/realm.json:ro
+    depends_on:
+      database:
+        condition: 'service_healthy'
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'HEAD /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+
+  {%- endif %}
+
+volumes:
+  database:
+    name: {{ cookiecutter.__api_docker_compose_name }}-database
+    driver: local
+
+networks:
+  default:
+    name: {{ cookiecutter.__api_docker_compose_name }}-default
+    driver: bridge

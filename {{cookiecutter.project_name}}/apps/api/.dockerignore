@@ -1,0 +1,102 @@
+# Miscellaneous
+.DS_Store
+Thumbs.db
+*.pem
+*.map
+*.so
+*.sock
+*.local
+
+# Git
+.git/
+.gitattributes
+.gitignore
+
+# Application non-runtime related files
+README.md
+tests/
+migrations/
+run/
+terraform/
+postman/
+Dockerfile
+docker-compose.yaml
+docker-compose.sql
+
+# Configurations
+.editorconfig
+.env
+.env.*
+*.example
+*.ini
+
+# Node
+node_modules/
+package-lock.json
+package.json
+
+# Common backup files
+*.swp
+*.bak
+*.tmp
+*~
+
+# Python
+venv/
+.venv/
+__pycache__
+*.py[cod]
+*$py.class
+.mypy_cache
+.dmypy.json
+dmypy.json
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+*.ipynb
+.flake8
+.pylintrc
+.python-version
+.pre-commit-config.yaml
+codecov.yml
+requirements.txt
+poetry.toml
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Various IDEs
+.vscode/
+.idea/
+.project
+*.tmproj
+
+# Logs files
+*.log
+pip-log.txt
+pip-delete-this-directory.txt

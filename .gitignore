@@ -1,0 +1,62 @@
+# Miscellaneous
+.DS_Store
+Thumbs.db
+*.pem
+*.swp
+*.map
+*.sock
+*.local
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Python virtual environment and interpreter cache
+.venv
+venv
+__pycache__
+*.py[cod]
+
+# MyPy cache directory
+.mypy_cache
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+# lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.ipynb_checkpoints/
+
+# Temporary files
+tmp/
+*.tmp
+*.bak

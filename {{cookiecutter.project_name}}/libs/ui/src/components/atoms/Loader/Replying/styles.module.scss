@@ -1,0 +1,37 @@
+.loader span {
+  --dot-size: 0.3125rem;
+  --dot-color: hsl(var(--blue-gray-600));
+
+  display: inline-block;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 100%;
+  background-color: var(--dot-color);
+  margin: 0.31rem auto;
+  opacity: 0;
+
+  &:nth-child(1) {
+    animation: opacitychange 1s ease-in-out infinite;
+  }
+
+  &:nth-child(2) {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    animation: opacitychange 1s ease-in-out 0.33s infinite;
+  }
+
+  &:nth-child(3) {
+    animation: opacitychange 1s ease-in-out 0.66s infinite;
+  }
+}
+
+@keyframes opacitychange {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,13 @@
+.userManual {
+  counter-reset: step-counter;
+
+  li {
+    counter-increment: step-counter;
+  }
+
+  p {
+    &::before {
+      content: counter(step-counter) '. ';
+    }
+  }
+}

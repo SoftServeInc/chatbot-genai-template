@@ -1,0 +1,14 @@
+# We'll let Git's auto-detection algorithm infer if a file is text. 
+# If it is a text file, then use LF newlines by default.
+*       text=auto eol=lf
+
+# Use CRLF newlines for text files containing "crlf" in their names.
+*crlf*  text=auto eol=crlf
+
+# Isolate binary files in case the auto-detection algorithm fails and
+# marks them as text files (which could brick them).
+*.{png,jpg,jpeg,gif,webp,woff,woff2} binary
+
+# Excluding files from git archive exports
+/.github export-ignore
+CHANGELOG.md export-ignore

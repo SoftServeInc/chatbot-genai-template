@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+{{ cookiecutter.__npm_run }} lint
+{{ cookiecutter.__npm_run }} test

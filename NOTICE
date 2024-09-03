@@ -1,0 +1,54 @@
+Chatbot GenAI Template - cookiecutter template for the chatbots and virtual assistants projects that aim to leverage modern Generative AI capabilities, specifically Large Language Models, to build conversational AI solutions.
+
+Copyright 2024 SoftServe Inc.
+
+This product includes software developed at SoftServe Inc. (https://www.softserveinc.com/).
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+---
+
+Third-Party Licenses and Attributions
+
+This project uses the following third-party libraries and technologies. We acknowledge and are grateful to these developers and projects for their contributions to open-source software.
+
+- Python: Python Software Foundation. Licensed under the Python Software Foundation License (https://docs.python.org/3/license.html).
+- FastAPI: Developed by Sebastián Ramírez. Licensed under the MIT License (https://github.com/tiangolo/fastapi/blob/master/LICENSE).
+- SQLModel: Licensed under the MIT License (https://github.com/tiangolo/sqlmodel/blob/main/LICENSE).
+- SQLAlchemy: Licensed under the MIT License (https://github.com/sqlalchemy/sqlalchemy/blob/main/LICENSE).
+- Pydantic: Licensed under the MIT License (https://github.com/pydantic/pydantic/blob/main/LICENSE).
+- Langchain: Licensed under the MIT License (https://github.com/hwchase17/langchain/blob/main/LICENSE).
+- Alembic: Licensed under the MIT License (https://github.com/sqlalchemy/alembic/blob/main/LICENSE).
+- PostgreSQL: PostgreSQL Global Development Group. Licensed under the PostgreSQL License (https://www.postgresql.org/about/licence/).
+- pgvector: Licensed under the MIT License (https://github.com/pgvector/pgvector/blob/main/LICENSE).
+- Black: Licensed under the MIT License (https://github.com/psf/black/blob/main/LICENSE).
+- Pytest: Licensed under the MIT License (https://github.com/pytest-dev/pytest/blob/main/LICENSE).
+- isort: Licensed under the MIT License (https://github.com/PyCQA/isort/blob/main/LICENSE).
+- Flake8: Licensed under the MIT License (https://gitlab.com/pycqa/flake8/-/blob/main/LICENSE).
+- PyLint: Licensed under the GPL License (https://github.com/PyCQA/pylint/blob/main/LICENSE).
+- MyPy: Licensed under the MIT License (https://github.com/python/mypy/blob/master/LICENSE).
+- Podman: Licensed under the Apache 2.0 License (https://github.com/containers/podman/blob/main/LICENSE).
+- Docker Compose: Licensed under the Apache 2.0 License (https://github.com/docker/compose/blob/master/LICENSE).
+- Terraform: Developed by HashiCorp. Licensed under the Mozilla Public License 2.0 (https://www.mozilla.org/en-US/MPL/2.0/).
+- Terragrunt: Licensed under the MIT License (https://github.com/gruntwork-io/terragrunt/blob/master/LICENSE).
+- Keycloak: Licensed under the Apache 2.0 License (https://github.com/keycloak/keycloak/blob/main/LICENSE).
+- Node.js: Node.js Foundation. Licensed under the MIT License (https://github.com/nodejs/node/blob/main/LICENSE).
+- TypeScript: Licensed under the Apache 2.0 License (https://github.com/microsoft/TypeScript/blob/main/LICENSE.txt).
+- React.js: Licensed under the MIT License (https://github.com/facebook/react/blob/main/LICENSE).
+- React Router: Licensed under the MIT License (https://github.com/remix-run/react-router/blob/main/LICENSE).
+- Shadcn UI: Licensed under the MIT License (https://github.com/shadcn/ui/blob/main/LICENSE).
+- Zustand: Licensed under the MIT License (https://github.com/pmndrs/zustand/blob/main/LICENSE).
+- Vite: Licensed under the MIT License (https://github.com/vitejs/vite/blob/main/LICENSE).
+- Jest: Licensed under the MIT License (https://github.com/facebook/jest/blob/main/LICENSE).
+- ESLint: Licensed under the MIT License (https://github.com/eslint/eslint/blob/main/LICENSE).
+- Prettier: Licensed under the MIT License (https://github.com/prettier/prettier/blob/main/LICENSE).

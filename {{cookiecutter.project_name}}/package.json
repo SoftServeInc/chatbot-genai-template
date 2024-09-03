@@ -1,0 +1,49 @@
+{
+  "name": "{{ cookiecutter.project_name }}",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*"{% if cookiecutter.terraform_cloud_provider != "none" %},
+    "terraform"
+  {%- endif %}
+  ],
+  "scripts": {
+    "prepare": "husky install",
+    "clean": "nx run-many -t clean && rimraf .nx/cache",
+    "build": "nx run-many -t build --output-style=stream",
+    "test": "nx run-many -t test",
+    "test:coverage": "nx run-many -t test:coverage --verbose",
+    "lint": "nx run-many -t lint",
+    "lint:fix": "nx run-many -t lint:fix",
+    "compose:up": "nx run-many -t compose:up --output-style=stream",
+    "compose:down": "nx run-many -t compose:down --output-style=stream",
+    "compose:remove": "nx run-many -t compose:remove --output-style=stream",
+    "compose:bootstrap": "nx run-many -t compose:bootstrap --output-style=stream",
+    "start": "concurrently --names \"API,WEB\" -c \"bgBlue.bold,bgMagenta.bold\" \"{{ cookiecutter.__npm_run_filter }} api start\" \"{{ cookiecutter.__npm_run_filter }} web start\" -k",
+    "start:dev": "concurrently --names \"API,WEB\" -c \"bgBlue.bold,bgMagenta.bold\" \"{{ cookiecutter.__npm_run_filter }} api start:dev\" \"{{ cookiecutter.__npm_run_filter }} web start:dev\" -k",
+    "format": "prettier --write \"**/*.{html,pug,json,js,ts,tsx,jsx,cjs,mjs,css,md}\"",
+    "deps:remove:js": "rimraf --glob \"**/node_modules\"",
+    "deps:remove:python": "rimraf --glob \"**/.venv\"",
+    "deps:remove": "{{ cookiecutter.__npm_run }} deps:remove:python && {{ cookiecutter.__npm_run }} deps:remove:js",
+    "deps:reinstall": "{{ cookiecutter.__npm_run }} deps:remove && {{ cookiecutter.__npm_run }} install",
+    "deps:update": "rimraf --glob{% if cookiecutter.__pip_lock %} \"**/{{ cookiecutter.__pip_lock }}\"{% endif %} \"**/{{ cookiecutter.__npm_lock }}\" && {{ cookiecutter.__npm_run }} deps:reinstall"
+  },
+  "devDependencies": {
+    "@nx/js": "17.1.3",
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.1.0",
+    "nx": "17.1.3",
+    "prettier": "^3.1.0",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=21.2.0"{% if cookiecutter.npm == "npm" %},
+    "npm": ">=10.1.0"
+    {%- endif %}
+  }{% if cookiecutter.npm == "pnpm" %},
+  "packageManager": "pnpm@9.3.0"
+  {%- endif %}
+}

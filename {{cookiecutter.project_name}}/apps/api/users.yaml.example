@@ -1,0 +1,22 @@
+---
+# The list of users for the local authenticator (i.e., when AUTH_PROVIDER=local is set in .env file)
+# ------------------
+# Service to generate a random UUID: https://www.uuidgenerator.net/
+# Service to generate a random password: https://1password.com/password-generator/
+# Service to hash the generated password: https://argon2.online/
+
+- id: 311755be-320a-40c1-a348-7fc99d43a3fa
+  username: user1@softserveinc.com
+  # It is recommended to use `password_hash` (generated with https://argon2.online/) instead of password for security reasons
+  # password: 12345
+  password_hash: $argon2i$v=19$m=16,t=2,p=1$ZnlUdFZlRzVBRG5LWmlDUA$FW+jm1ZLSpkEH+plxkWblQ
+  first_name: User
+  last_name: One
+
+- id: da255701-3b08-4c4c-a1d8-d24b1cf585bb
+  username: user2@softserveinc.com
+  # It is recommended to use `password_hash` (generated with https://argon2.online/) instead of password for security reasons
+  # password: 12345
+  password_hash: $argon2i$v=19$m=16,t=2,p=1$ZnlUdFZlRzVBRG5LWmlDUA$FW+jm1ZLSpkEH+plxkWblQ
+  first_name: User
+  last_name: Two

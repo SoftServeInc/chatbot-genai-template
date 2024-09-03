@@ -1,0 +1,114 @@
+{
+  "name": "{{ cookiecutter.__api_project_name }}",
+  "description": "{{ cookiecutter.__api_project_title }} application",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "postinstall": "python run install",
+    "clean": "python run clean",
+    "build": "python run build",
+    "test": "python run test",
+    "test:coverage": "python run test:coverage",
+    "lint": "python run lint",
+    "lint:fix": "python run lint:fix",
+    "start": "python run start",
+    "start:dev": "python run start:dev",
+    "migration:upgrade": "python run migration:upgrade",
+    "migration:downgrade": "python run migration:downgrade",
+    "migration:generate": "python run migration:generate",
+    "compose:up": "python run compose:up",
+    "compose:down": "python run compose:down",
+    "compose:remove": "python run compose:remove",
+    "compose:bootstrap": "python run compose:bootstrap"
+  },
+  "nx": {
+    "namedInputs": {
+      "default": [
+        "{projectRoot}/api/**/*.{py,pyi}",
+        "{projectRoot}/pyproject.toml"
+      ],
+      "production": [
+        "default",
+        "{projectRoot}/poetry.lock",
+        "{projectRoot}/users.yaml",
+        "{projectRoot}/.dockerignore"
+      ],
+      "test": [
+        "{projectRoot}/api/**/*.{py,pyi}",
+        "{projectRoot}/tests/**/*.{py,pyi}",
+        "{projectRoot}/poetry.lock",
+        "{projectRoot}/pyproject.toml"
+      ],
+      "codestyle": [
+        "{projectRoot}/.flake8",
+        "{projectRoot}/.pylintrc"
+      ]
+    },
+    "targets": {
+      "clean": {
+        "cache": false
+      },
+      "build": {
+        "cache": true,
+        "dependsOn": ["clean"],
+        "inputs": ["production"],
+        "outputs": []
+      },
+      "test": {
+        "cache": true,
+        "inputs": ["test"],
+        "outputs": []
+      },
+      "test:coverage": {
+        "cache": true,
+        "inputs": ["test"],
+        "outputs": ["{projectRoot}/coverage"]
+      },
+      "lint": {
+        "cache": true,
+        "inputs": ["default", "codestyle"],
+        "outputs": []
+      },
+      "lint:fix": {
+        "cache": true,
+        "inputs": ["default", "codestyle"],
+        "outputs": []
+      },
+      "start": {
+        "dependsOn": ["^build"],
+        "cache": false
+      },
+      "start:dev": {
+        "dependsOn": ["clean"],
+        "cache": false
+      },
+      "migration:upgrade": {
+        "cache": false
+      },
+      "migration:downgrade": {
+        "cache": false
+      },
+      "migration:generate": {
+        "cache": false
+      },
+      "compose:up": {
+        "cache": false
+      },
+      "compose:down": {
+        "cache": false
+      },
+      "compose:remove": {
+        "cache": false
+      },
+      "compose:bootstrap": {
+        "cache": false
+      }
+    }
+  },
+  "lint-staged": {
+    "*.{py,pyi}": [
+      "python run lint:staged"
+    ]
+  }
+}

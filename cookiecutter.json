@@ -1,0 +1,110 @@
+{
+  "project_title": "Example Chatbot",
+  "project_name": "{{ cookiecutter.project_title|lower|replace(' ', '-') }}",
+  "database_name": "{{ cookiecutter.project_name|replace('-', '_') }}",
+  "enable_pgvector": false,
+  "enable_mypy": true,
+  "pip": [
+    "poetry",
+    "pip"
+  ],
+  "enable_web_ui": true,
+  "npm": [
+    "pnpm",
+    "npm"
+  ],
+  "auth": [
+    "local",
+    "keycloak",
+    "dummy"
+  ],
+  "llm_provider": [
+    "openai",
+    "vertexai",
+    "bedrock"
+  ],
+  "container_engine": [
+    "docker",
+    "podman"
+  ],
+  "terraform_cloud_provider": [
+    "aws",
+    "gcp",
+    "azure",
+    "none"
+  ],
+
+  "__pip_lock": "{{ ({'poetry': 'poetry.lock', 'pip': ''})[cookiecutter.pip] }}",
+
+  "__npm_run": "{{ ({'pnpm': 'pnpm', 'npm': 'npm run'})[cookiecutter.npm] }}",
+  "__npm_run_filter": "{{ ({'pnpm': 'pnpm -F', 'npm': 'npm run -w'})[cookiecutter.npm] }}",
+  "__npm_lock": "{{ ({'pnpm': 'pnpm-lock.yaml', 'npm': 'package-lock.json'})[cookiecutter.npm] }}",
+  "__npx": "{{ ({'pnpm': 'pnpm', 'npm': 'npx'})[cookiecutter.npm] }}",
+
+  "__terraform_cloud_provider_title": "{{ ({'aws': 'AWS', 'gcp': 'GCP', 'azure': 'Azure', 'none': '_'})[cookiecutter.terraform_cloud_provider] }}",
+  "__terraform_cloud_provider_title_long": "{{ ({'aws': 'Amazon Web Services', 'gcp': 'Google Cloud Platform', 'azure': 'Microsoft Azure', 'none': '_'})[cookiecutter.terraform_cloud_provider] }}",
+  "__terraform_cloud_provider_image_registry": "{{ ({'aws': 'Amazon Elastic Container Registry', 'gcp': 'Google Cloud Artifact Registry', 'azure': 'Azure Container Registry', 'none': '_'})[cookiecutter.terraform_cloud_provider] }}",
+  "__terraform_cloud_provider_object_storage": "{{ ({'aws': 'Amazon S3', 'gcp': 'Google Cloud Storage', 'azure': 'Azure Blob Storage', 'none': '_'})[cookiecutter.terraform_cloud_provider] }}",
+  "__terraform_cloud_provider_url": "https://{{ ({'aws': 'aws.amazon.com', 'gcp': 'cloud.google.com', 'azure': 'azure.microsoft.com', 'none': '_'})[cookiecutter.terraform_cloud_provider] }}",
+
+  "__monorepo": "{% if cookiecutter.enable_web_ui %}True{% endif %}",
+
+  "__web_project_title": "{% if cookiecutter.enable_web_ui %}{{cookiecutter.project_title}} Web UI{% endif %}",
+  "__web_project_name": "{% if cookiecutter.enable_web_ui %}web{% endif %}",
+
+  "__api_project_title": "{{ cookiecutter.project_title }}{% if cookiecutter.enable_web_ui %} Backend API{% endif %}",
+  "__api_project_name": "{% if cookiecutter.enable_web_ui %}api{% else %}{{ cookiecutter.project_name }}{% endif %}",
+  "__api_package_name": "{% if cookiecutter.enable_web_ui %}api{% else %}{{ cookiecutter.project_name|lower|replace('-', '_') }}{% endif %}",
+  "__api_docker_compose_name": "{{ cookiecutter.project_name }}{% if cookiecutter.__monorepo %}-api{% endif %}",
+
+  "__prompts__": {
+    "project_title": "👀 Project title (human readable)",
+    "project_name": "🎫 Project name (kebab-case)",
+    "database_name": "💿 PostgreSQL database name (snake_case)",
+    "enable_pgvector": "🏹 Enable PostgreSQL vector extension",
+    "enable_mypy": "🚨 Enable MyPy type checking",
+    "pip": {
+      "__prompt__": "🐍 Python dependencies management:",
+      "poetry": "poetry (recommended 👍)",
+      "pip": "pip"
+    },
+    "enable_web_ui": "🎡 Do you need Web UI?",
+    "npm": {
+      "__prompt__": "📦 Node.js package manager (if Web UI is enabled):",
+      "pnpm": "pnpm (fast, recommended 👍)",
+      "npm": "npm (slow... ⏳)"
+    },
+    "auth": {
+      "__prompt__": "🔐 Authentication provider:",
+      "local": "Local YAML (username/password stored in a YAML file 🤫)",
+      "keycloak": "Keycloak (containerized IdP with OAuth2, OIDC, etc. 🛡️)",
+      "dummy": "Dummy (username = dummy, password = dummy 👻)"
+    },
+    "llm_provider": {
+      "__prompt__": "🧠 LLM provider:",
+      "openai": "Azure OpenAI (GPT-3.5, GPT-4, etc.)",
+      "vertexai": "Google Vertex AI (Gemini Pro, PaLM 2, etc.)",
+      "bedrock": "Amazon Bedrock (Anthropic Claude 2, LLaMA 2, Amazon Titan, etc.)"
+    },
+    "container_engine": {
+      "__prompt__": "🚢 Container engine:",
+      "docker": "Docker (if you have a paid subscription 💰)",
+      "podman": "Podman (free, open-source 🆓)"
+    },
+    "terraform_cloud_provider": {
+      "__prompt__": "🚀 Deployment cloud provider:",
+      "aws": "AWS (ECS, Fargate, RDS for PostgreSQL, S3, etc.)",
+      "gcp": "GCP (Cloud Run, Cloud SQL for PostgreSQL, Cloud Storage, etc.)",
+      "azure": "Azure (Container Apps, PostgreSQL Flexible Server, Blob Storage, etc.)",
+      "none": "I don't need to deploy 🚧"
+    }
+  },
+
+  "_copy_without_render": [
+    ".vscode",
+    "apps/web/src",
+    "libs/ui/src",
+    "libs/ui/.storybook",
+    "postman/{{ cookiecutter.project_name }}.postman_collection.json"
+  ]
+}

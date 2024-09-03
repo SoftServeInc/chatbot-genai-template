@@ -1,0 +1,43 @@
+{
+  "name": "terraform",
+  "description": "{{ cookiecutter.project_title }} Terraform configurations",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "lint": "terragrunt hclfmt --terragrunt-check && terraform fmt -recursive -check",
+    "lint:fix": "terragrunt hclfmt && terraform fmt -recursive",
+    "clean": "rimraf --glob \"**/.terragrunt-cache\" \"**/__pycache__\""
+  },
+  "nx": {
+    "namedInputs": {
+      "default": [
+        "{projectRoot}/**/*.{hcl,tf,tfvars}"
+      ]
+    },
+    "targets": {
+      "lint": {
+        "cache": true,
+        "inputs": [
+          "default"
+        ],
+        "outputs": []
+      },
+      "lint:fix": {
+        "cache": true,
+        "inputs": [
+          "default"
+        ],
+        "outputs": []
+      }
+    }
+  },
+  "lint-staged": {
+    "*.{tf,tfvars}": [
+      "terraform fmt"
+    ],
+    "*.hcl": [
+      "terragrunt hclfmt"
+    ]
+  }
+}

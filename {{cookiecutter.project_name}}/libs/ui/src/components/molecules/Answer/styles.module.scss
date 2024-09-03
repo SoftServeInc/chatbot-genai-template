@@ -1,0 +1,27 @@
+.textCard {
+  strong {
+    font-weight: 600;
+    letter-spacing: -0.01rem;
+  }
+
+  & > p {
+    &:not(:last-of-type) {
+      margin-bottom: 1rem;
+    }
+
+    strong {
+      font-size: 1rem;
+    }
+  }
+
+  ul {
+    margin: 1.25rem 0;
+    padding-left: 1.725rem;
+    list-style: disc;
+  }
+
+  a {
+    color: hsl(var(--blue-700));
+    text-decoration-line: underline;
+  }
+}

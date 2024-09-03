@@ -1,0 +1,47 @@
+{
+  "name": "config",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "description": "{{ cookiecutter.project_title }} DevTools confgurations",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "lint": "prettier --check \"{eslint,typescript}/**/*.{js,json}\"",
+    "lint:fix": "prettier --write \"{eslint,typescript}/**/*.{js,json}\""
+  },
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "eslint-plugin-testing-library": "^6.2.0",
+    "immer": "^10.0.3",
+    "postcss": "^8.4.31",
+    "prettier": "^3.1.0",
+    "sass": "^1.69.5",
+    "typescript": "^5.3.2"
+  },
+  "files": [
+    "eslint/*.js",
+    "jest/*.js",
+    "typescript/*.json"
+  ],
+  "lint-staged": {
+    "*.{js,json}": [
+      "prettier --loglevel silent --write"
+    ]
+  },
+  "dependencies": {}
+}

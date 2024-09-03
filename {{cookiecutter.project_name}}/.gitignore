@@ -1,0 +1,144 @@
+# Miscellaneous
+.DS_Store
+Thumbs.db
+*.pem
+*.swp
+*.map
+*.so
+*.sock
+*.local
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Python virtual environment and interpreter cache
+.venv
+venv
+__pycache__
+*.py[cod]
+*$py.class
+
+# MyPy cache directory
+.mypy_cache
+.dmypy.json
+dmypy.json
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+# lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.ipynb_checkpoints/
+requirements.txt
+
+# GCP credentials
+*key.json
+*credentials.json
+
+# Local users base
+users.yaml
+
+# Sensitive configurations
+.env
+.env.local
+.env.*.local
+!.env.*
+!.env.example
+
+# Node.js dependencies
+node_modules
+.pnp
+.pnp.js
+npm-debug.log*
+
+# Testing
+coverage
+.nyc_output
+
+# Vite / Nest.js
+dist
+dist-ssr
+
+# Next.js
+.next/
+out/
+build
+
+# Monorepo
+.turbo
+.nx/cache
+
+# TS / Vite build files
+*.tsbuildinfo
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Temporary files
+tmp/
+*.tmp
+*.bak
+
+# Terraform
+.terraform
+.terragrunt-cache
+terragrunt_rendered.json
+tfplan
+*.tfplan
+*.tfstate

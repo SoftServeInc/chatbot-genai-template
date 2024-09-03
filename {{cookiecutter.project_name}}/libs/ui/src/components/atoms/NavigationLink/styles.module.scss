@@ -1,0 +1,40 @@
+@mixin nav-icon() {
+  width: 1.5rem;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  position: absolute;
+  top: 50%;
+  left: 1.265rem;
+  transform: translateY(-50%);
+}
+
+.navigationLink {
+  position: relative;
+
+  &:first-of-type::before,
+  &[data-with-icon='true']::before {
+    counter-set: navigation;
+    display: none;
+  }
+
+  &::before {
+    content: counter(navigation);
+    counter-increment: navigation;
+    border: 1.5px solid;
+    border-radius: 50%;
+    font-size: 0.875rem;
+    font-weight: 800;
+    line-height: 1.25rem;
+    text-align: center;
+    pointer-events: all;
+  }
+
+  &::before,
+  .icon {
+    @include nav-icon;
+  }
+}
+
+.Icon {
+  @include nav-icon;
+}

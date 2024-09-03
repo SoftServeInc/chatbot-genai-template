@@ -1,0 +1,216 @@
+{% if cookiecutter.pip == "poetry" -%}
+
+[build-system]
+requires = ["poetry-core"] # a list of dependencies required to build the package
+build-backend = "poetry.core.masonry.api" # the Python object used to perform the build process
+
+[tool.poetry]
+name = "{{ cookiecutter.__api_project_name }}"
+description = "{{ cookiecutter.__api_project_title }} application"
+version = "0.0.0"
+authors = ["SoftServe CoE Solutions <coe-solutions@softserveinc.com>"]
+keywords = ["chatbot", "assistant", "generative", "ai", "llm", "gpt"]
+readme = "README.md"
+packages = [{ include = "{{ cookiecutter.__api_package_name }}" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11, <3.12"
+pydantic = "^1.10.14" # https://github.com/tiangolo/sqlmodel/issues/654
+python-dotenv = "^1.0.1"
+fastapi = "^0.110.0"
+langchain = "^0.1.14"
+langchain-core = "^0.1.37"
+langchain-community = "^0.0.30"
+tiktoken = "^0.5.2"
+uvicorn = "^0.29.0"
+pyjwt = "^2.8.0"
+pyyaml = "^6.0.1"
+python-multipart = "^0.0.9"
+{%- if cookiecutter.auth == "local" %}
+argon2-cffi = "^23.1.0"
+{%- elif cookiecutter.auth == "keycloak" %}
+python-keycloak = "^4.0.0"
+{%- endif %}
+# Database dependencies (PostgreSQL)
+asyncpg = "^0.29.0"
+{%- if cookiecutter.enable_pgvector %}
+pgvector = "^0.2.5"
+{%- endif %}
+sqlmodel = "^0.0.13" # https://github.com/tiangolo/sqlmodel/discussions/732
+sqlalchemy = { version = "^2.0.25", extras = ["asyncio"] }
+# OpenAI dependencies - only if you want to use OpenAI LLMs
+openai = "^1.14.3"
+langchain-openai = "^0.1.1"
+# GCP dependencies - only if you want to use VertexAI LLMs
+google-cloud-aiplatform = "^1.46.0"
+langchain-google-vertexai = "^0.1.2"
+transformers = "^4.37.2"
+# AWS dependencies - only if you want to use Amazon Bedrock LLMs
+boto3 = "^1.34.74"
+botocore = "^1.34.74"
+anthropic = "^0.21.3"
+
+[tool.poetry.group.dev.dependencies]
+alembic = "^1.13.1"
+{%- if cookiecutter.enable_mypy %}
+mypy = "^1.8.0"
+{%- endif %}
+{%- if not cookiecutter.__monorepo %}
+pre-commit = "^3.7.1"
+{%- endif %}
+pylint = "^3.0.3"
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.7"
+pytest-cov = "^4.1.0"
+isort = "^5.13.2"
+black = "^24.1.1"
+flake8 = "^7.0.0"
+types-pyyaml = "^6.0.12.12"
+boto3-stubs = "^1.34.70"
+
+{% else -%}
+[build-system]
+requires = ['setuptools'] # a list of dependencies required to build the package
+build-backend = 'setuptools.build_meta' # the Python object used to perform the build process
+
+[project]
+name = "{{ cookiecutter.__api_project_name }}"
+description = "{{ cookiecutter.__api_project_title }} application"
+version = "0.0.0"
+authors = [{name = "SoftServe CoE Solutions", email = "coe-solutions@softserveinc.com"}]
+keywords = ["chatbot", "assistant", "generative", "ai", "llm", "gpt"]
+readme = "README.md"
+requires-python = ">=3.11, <3.12"
+dependencies = [
+  "pydantic==1.10.14", # https://github.com/tiangolo/sqlmodel/issues/654
+  "python-dotenv==1.0.1",
+  "fastapi==0.109.2",
+  "langchain==0.1.14",
+  "langchain-core==0.1.37",
+  "langchain-community==0.0.30",
+  "tiktoken==0.5.2",
+  "uvicorn==0.29.0",
+  "pyjwt==2.8.0",
+  "pyyaml==6.0.1",
+  "python-multipart==0.0.9",
+  {%- if cookiecutter.auth == "local" %}
+  "argon2-cffi==23.1.0",
+  {%- elif cookiecutter.auth == "keycloak" %}
+  "python-keycloak==4.0.0",
+  {%- endif %}
+  # Database dependencies (PostgreSQL)
+  "asyncpg==0.29.0",
+  {%- if cookiecutter.enable_pgvector %}
+  "pgvector==0.2.5",
+  {%- endif %}
+  "sqlmodel==0.0.13", # https://github.com/tiangolo/sqlmodel/discussions/732
+  "sqlalchemy[asyncio]==2.0.25",
+  # OpenAI dependencies - only if you want to use OpenAI LLMs
+  "openai==1.14.3",
+  "langchain-openai==0.1.1",
+  # GCP dependencies - only if you want to use VertexAI LLMs
+  "google-cloud-aiplatform==1.46.0",
+  "langchain-google-vertexai==0.1.2",
+  "transformers==4.37.2",
+  # AWS dependencies - only if you want to use Amazon Bedrock LLMs
+  "boto3==1.34.74",
+  "botocore==1.34.74",
+  "anthropic==0.21.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "alembic==1.13.1",
+  {%- if cookiecutter.enable_mypy %}
+  "mypy==1.8.0",
+  {%- endif %}
+  {%- if not cookiecutter.__monorepo %}
+  "pre-commit==3.7.1",
+  {%- endif %}
+  "pylint==3.0.3",
+  "pytest==8.0.0",
+  "pytest-asyncio==0.23.7",
+  "pytest-cov==4.1.0",
+  "isort==5.13.2",
+  "black==24.1.1",
+  "flake8==7.0.0",
+  "types-pyyaml==6.0.12.12",
+  "boto3-stubs==1.34.70",
+]
+
+[tool.setuptools.packages.find]
+include = ["{{ cookiecutter.__api_package_name }}", "{{ cookiecutter.__api_package_name }}.*"]
+
+{% endif -%}
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+include = "\\.pyi?$"
+
+{%- if cookiecutter.enable_mypy %}
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+mypy_path = "api"
+python_version = "3.11"
+strict_optional = true
+warn_return_any = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = false
+# for strict mypy: (this is the tricky one :-))
+# disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["asyncpg.*"{% if cookiecutter.enable_pgvector %}, "pgvector.*"{% endif %}{% if cookiecutter.auth == "keycloak" %}, "jwcrypto.*", "keycloak.*"{% endif %}]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+{%- endif %}
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true  # Enable branch coverage
+omit = ["tests/*"]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self\\.debug",
+
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
+
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if __name__ == .__main__.:",
+
+  # Don't complain about abstract methods, they aren't run:
+  "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "coverage/lcov-report"
+
+[tool.coverage.json]
+output = "coverage/coverage-final.json"
+
+[tool.coverage.lcov]
+output = "coverage/lcov.info"

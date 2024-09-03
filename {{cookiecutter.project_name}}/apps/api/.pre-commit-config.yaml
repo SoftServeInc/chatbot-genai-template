@@ -1,0 +1,54 @@
+default_install_hook_types: [pre-commit, pre-push]
+default_language_version:
+  python: python3.11
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.5.0"
+    hooks:
+      - id: check-case-conflict
+        stages: [pre-commit, manual]
+
+      - id: check-merge-conflict
+        stages: [pre-commit, manual]
+
+      - id: check-toml
+        stages: [pre-commit, manual]
+
+      - id: check-yaml
+        stages: [pre-commit, manual]
+
+      - id: end-of-file-fixer
+        stages: [pre-commit, manual]
+
+      - id: trailing-whitespace
+        stages: [pre-commit, manual]
+
+  - repo: local
+    hooks:
+      - id: lint-staged
+        name: lint staged python sources
+        entry: python run lint:staged
+        language: system
+        types: [python]
+        always_run: false
+        pass_filenames: true
+        stages: [pre-commit]
+
+      - id: lint
+        name: lint all python sources
+        entry: python run lint
+        language: system
+        types: [python]
+        always_run: true
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: test
+        name: run unit tests
+        entry: python run test
+        language: system
+        types: [python]
+        always_run: true
+        pass_filenames: false
+        stages: [pre-push]

@@ -1,0 +1,122 @@
+{
+  "id": "11111111-1111-1111-1111-11111111111",
+  "realm": "${KEYCLOAK_REALM_NAME}",
+  "displayName": "{{ cookiecutter.project_title }}",
+  "displayNameHtml": "<h1 style=\"font-size: 40pt; font-weight: 400;\">{{ cookiecutter.project_title }}</h1>",
+  "sslRequired": "${KC_SSL_REQUIRED}",
+  "notBefore": 0,
+  "revokeRefreshToken": false,
+  "refreshTokenMaxReuse": 0,
+  "accessTokenLifespan": 3600,
+  "accessTokenLifespanForImplicitFlow": 7200,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "enabled": true,
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxTemporaryLockouts": 0,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "failureFactor": 30,
+  "eventsEnabled": true,
+  "eventsExpiration": 900,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
+  "attributes": {
+    "adminEventsExpiration": "900"
+  },
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "User privileges",
+        "composite": true,
+        "composites": {
+          "client": {
+            "account": [
+              "manage-account",
+              "view-profile"
+            ]
+          }
+        }
+      },
+      {
+        "name": "admin",
+        "description": "Administrator privileges",
+        "composite": true,
+        "composites": {
+          "client": {
+            "realm-management": [
+              "manage-events",
+              "view-events",
+              "view-users",
+              "manage-users",
+              "query-users",
+              "query-groups"
+            ],
+            "account": [
+              "manage-account",
+              "view-profile"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "defaultRoles": [
+    "user"
+  ],
+  "requiredCredentials": [
+    "password"
+  ],
+  "clients": [
+    {
+      "id": "33333333-3333-3333-3333-33333333333",
+      "clientId": "${KEYCLOAK_CLIENT_ID}",
+      "name": "API Server",
+      "enabled": true,
+      "publicClient": false,
+      "surrogateAuthRequired": false,
+      "alwaysDisplayInConsole": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KEYCLOAK_CLIENT_SECRET}"
+    }
+  ],
+  "users": [
+    {
+      "id": "00000000-0000-0000-0000-00000000000",
+      "createdTimestamp": 0,
+      "email": "",
+      "username": "admin",
+      "firstName": "-",
+      "lastName": "-",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "temporary": false,
+          "type": "password",
+          "value": "${KEYCLOAK_ADMIN_PASSWORD}"
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ]
+    }
+  ]
+}
