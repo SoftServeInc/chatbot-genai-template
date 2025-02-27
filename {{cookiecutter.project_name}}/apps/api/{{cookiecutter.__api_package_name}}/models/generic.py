@@ -36,7 +36,7 @@ class GenericResource(SQLModel):
 
     class Config:
         @staticmethod
-        def schema_extra(
+        def json_schema_extra(
             schema: dict[str, dict[str, dict[str, Any]]],
             cls: type["GenericResource"],
         ):
@@ -61,7 +61,7 @@ class GenericResource(SQLModel):
 
     def json_min(self) -> str:
         """Convert the model to a JSON string with the minimum possible whitespace"""
-        return self.json(by_alias=True, separators=(",", ":"))
+        return self.model_dump_json(by_alias=True)
 
 
 class HttpUrlType(TypeDecorator):

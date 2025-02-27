@@ -4,12 +4,12 @@ from typing import Generic, TypeVar
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from pydantic.generics import GenericModel
+from pydantic import BaseModel
 
 T = TypeVar("T")
 
 
-class DataResponse(GenericModel, Generic[T]):
+class DataResponse(BaseModel, Generic[T]):
     """Generic data response model"""
 
     data: T

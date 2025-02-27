@@ -2,7 +2,7 @@
 
 from typing import ClassVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from .....common.utils import without
 from .....models import Message, MessageBase, MessageSegmentType
@@ -27,15 +27,13 @@ class ConverseChatSegment(BaseModel):
     content: str = Field(max_length=1000)
 
 
-class ConverseChat(BaseModel):
+class ConverseChat(RootModel[list[ConverseChatSegment]]):
     """DTO resprequestonse model for POST /chats/{chat_id}/converse endpoint"""
-
-    __root__: list[ConverseChatSegment]
 
     @property
     def segments(self) -> list[ConverseChatSegment]:
         """Returns the segments of the chat message sent by the user"""
-        return self.__root__
+        return self.root
 
     @property
     def text(self) -> str:

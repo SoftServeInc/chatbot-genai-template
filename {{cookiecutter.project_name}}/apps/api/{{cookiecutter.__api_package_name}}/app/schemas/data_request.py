@@ -2,12 +2,12 @@
 
 from typing import Generic, TypeVar
 
-from pydantic.generics import GenericModel
+from pydantic import BaseModel
 
 T = TypeVar("T")
 
 
-class DataRequest(GenericModel, Generic[T]):
+class DataRequest(BaseModel, Generic[T]):
     """Generic data request model"""
 
     data: T

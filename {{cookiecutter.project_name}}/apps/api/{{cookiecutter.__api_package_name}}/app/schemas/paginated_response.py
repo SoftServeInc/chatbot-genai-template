@@ -5,7 +5,6 @@ from typing import Generic, TypeVar
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
 
 from .pagination import Paginated
 
@@ -26,7 +25,7 @@ class PaginatedResponseMeta(BaseModel):
     page: PaginatedResponseMetaPage
 
 
-class PaginatedResponse(GenericModel, Generic[T]):
+class PaginatedResponse(BaseModel, Generic[T]):
     """Generic paginated response model"""
 
     meta: PaginatedResponseMeta

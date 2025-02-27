@@ -22,7 +22,7 @@ def sse_event(data: Any, event: Optional[str] = None) -> str:
     if isinstance(data, GenericResource):
         content += data.json_min()
     elif isinstance(data, BaseModel):
-        content += data.json(by_alias=True, separators=(",", ":"))
+        content += data.model_dump_json(by_alias=True)
     elif isinstance(data, dict):
         content += json_dump_min(data)
     else:
