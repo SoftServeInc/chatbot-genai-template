@@ -4,14 +4,13 @@ from typing import ClassVar
 from uuid import UUID, uuid4
 
 from pydantic import HttpUrl
-from sqlmodel import Column as SQLColumn
 from sqlmodel import DateTime as SQLDateTime
 from sqlmodel import Field as SQLField
 from sqlmodel import Relationship as SQLRelationship
 from sqlmodel import SQLModel
 
 from ..common.datetime import datetime, now
-from .generic import TableName
+from .generic import HttpUrlType, TableName
 
 
 class TermsVersionBase(SQLModel):
@@ -19,10 +18,16 @@ class TermsVersionBase(SQLModel):
 
     id: UUID = SQLField(default_factory=uuid4, primary_key=True)
     url: HttpUrl = SQLField(
-        nullable=False, index=True, schema_extra={"example": "https://www.softserveinc.com/en-us/terms-and-conditions"}
+        sa_type=HttpUrlType,
+        nullable=False,
+        index=True,
+        schema_extra={"example": "https://www.softserveinc.com/en-us/terms-and-conditions"},
     )
     published_at: datetime = SQLField(
-        default_factory=now, sa_column=SQLColumn(SQLDateTime(timezone=True), nullable=False, index=True)
+        default_factory=now,
+        sa_type=SQLDateTime(timezone=True),
+        nullable=False,
+        index=True,
     )
 
 
@@ -44,4 +49,8 @@ class TermsVersionAgreement(SQLModel, table=True):
 
     terms_version_id: UUID = SQLField(nullable=False, primary_key=True, foreign_key="terms_versions.id")
     user_id: str = SQLField(nullable=False, primary_key=True)
-    agreed_at: datetime = SQLField(default_factory=now, sa_column=SQLColumn(SQLDateTime(timezone=True), nullable=False))
+    agreed_at: datetime = SQLField(
+        default_factory=now,
+        sa_type=SQLDateTime(timezone=True),
+        nullable=False,
+    )

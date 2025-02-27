@@ -64,10 +64,11 @@ class MessageBase(GenericResource):
     """The base model representing a chat message with its role and content"""
 
     chat_id: UUID = SQLField(foreign_key="chats.id")
-    role: MessageRole = SQLField(sa_column=SQLColumn(SQLEnum(MessageRole, name="message_role"), nullable=False))
+    role: MessageRole = SQLField(sa_type=SQLEnum(MessageRole, name="message_role"), nullable=False)
     segments: list[_MessageSegment] = SQLField(
         default_factory=list,
-        sa_column=SQLColumn(SQL_JSONB, nullable=False),
+        sa_type=SQL_JSONB,
+        nullable=False,
         schema_extra={
             "examples": [
                 [
@@ -121,7 +122,10 @@ class MessageBase(GenericResource):
         https://github.com/tiangolo/sqlmodel/issues/52#issuecomment-1311987732
         """
         return [
-            MessageSegment(segment.get("type", MessageSegmentType.TEXT), segment.get("content", ""))
+            MessageSegment(
+                segment.get("type", MessageSegmentType.TEXT),
+                segment.get("content", ""),
+            )
             for segment in self.segments
         ]
 

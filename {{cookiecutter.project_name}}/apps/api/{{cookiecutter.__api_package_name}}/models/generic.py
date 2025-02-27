@@ -3,9 +3,9 @@
 from typing import Any, Callable, Optional
 from uuid import UUID, uuid4
 
-from pydantic import validator
+from pydantic import HttpUrl, field_validator
+from sqlalchemy import String, TypeDecorator
 from sqlalchemy.orm.attributes import set_committed_value
-from sqlmodel import Column as SQLColumn
 from sqlmodel import DateTime as SQLDateTime
 from sqlmodel import Field as SQLField
 from sqlmodel import SQLModel
@@ -20,28 +20,34 @@ class GenericResource(SQLModel):
 
     id: UUID = SQLField(default_factory=uuid4, primary_key=True)
     created_at: datetime = SQLField(
-        default_factory=now, sa_column=SQLColumn(SQLDateTime(timezone=True), nullable=False, index=True)
+        default_factory=now,
+        sa_type=SQLDateTime(timezone=True),
+        nullable=False,
+        index=True,
     )
-    modified_at: datetime = SQLField(
-        default_factory=now, sa_column=SQLColumn(SQLDateTime(timezone=True), nullable=False)
-    )
+    modified_at: datetime = SQLField(default_factory=now, sa_type=SQLDateTime(timezone=True), nullable=False)
     deleted_at: Optional[datetime] = SQLField(
         default=None,
-        sa_column=SQLColumn(SQLDateTime(timezone=True), nullable=True),
+        sa_type=SQLDateTime(timezone=True),
+        nullable=True,
         exclude=True,
         schema_extra={"hidden": True},
     )
 
     class Config:
         @staticmethod
-        def schema_extra(schema: dict[str, dict[str, dict[str, Any]]], cls: type["GenericResource"]):
+        def schema_extra(
+            schema: dict[str, dict[str, dict[str, Any]]],
+            cls: type["GenericResource"],
+        ):
             """Do not include hidden fields in the schema"""
             hidden = getattr(cls, "__hidden__", [])
             schema["properties"] = {
                 k: v for k, v in schema.get("properties", {}).items() if not v.pop("hidden", False) and k not in hidden
             }
 
-    @validator("created_at", "modified_at", "deleted_at", pre=True)
+    @field_validator("created_at", "modified_at", "deleted_at", mode="before")
+    @classmethod
     def time_validate(cls, time: Any) -> Optional[datetime]:  # pylint: disable=no-self-argument
         """Parse and validate the value of timestamp fields"""
         if time is None:
@@ -56,3 +62,23 @@ class GenericResource(SQLModel):
     def json_min(self) -> str:
         """Convert the model to a JSON string with the minimum possible whitespace"""
         return self.json(by_alias=True, separators=(",", ":"))
+
+
+class HttpUrlType(TypeDecorator):
+    """SQLAlchemy type for the HttpUrl type"""
+
+    impl = String(2083)
+    cache_ok = True
+    python_type = HttpUrl
+
+    def process_bind_param(self, value: HttpUrl, *_, **__) -> str:
+        """Convert the value to a string"""
+        return str(value)
+
+    def process_result_value(self, value: str, *_, **__) -> HttpUrl:
+        """Convert the value to an HttpUrl"""
+        return HttpUrl(url=value)
+
+    def process_literal_param(self, value: HttpUrl, *_, **__) -> str:
+        """Convert the value to a string"""
+        return str(value)
