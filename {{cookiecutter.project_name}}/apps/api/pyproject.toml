@@ -45,6 +45,8 @@ langchain-google-vertexai = ">=2,  <3"
 boto3 = "^1.34.74"
 botocore = "^1.34.74"
 langchain-aws = ">=0.2, <0.3"
+anthropic = "^0.48.0"
+transformers = "^4.49.0"
 
 [tool.poetry.group.dev.dependencies]
 alembic = "^1.13.1"

@@ -13,11 +13,11 @@ from typing import Any, Callable, Optional, TypeVar
 
 from botocore.exceptions import EventStreamError
 from langchain.schema import BaseMessage
-from langchain_community.chat_models.bedrock import BedrockChat as BaseBedrockChat
-from langchain_community.llms.bedrock import Bedrock as BaseBedrock
-from langchain_community.llms.bedrock import BedrockBase as _BedrockBaseModel
+from langchain_aws.chat_models.bedrock import ChatBedrock as BaseBedrockChat
+from langchain_aws.llms.bedrock import BedrockLLM as BaseBedrock
 from langchain_core.callbacks import CallbackManagerForLLMRun
 
+_BedrockBaseModel = BaseBedrock
 T = TypeVar("T")
 
 

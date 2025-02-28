@@ -3,8 +3,8 @@
 from typing import Any, ClassVar
 
 from langchain.callbacks.base import Callbacks
-from langchain_community.embeddings.bedrock import BedrockEmbeddings
-from langchain_community.llms.bedrock import BedrockBase
+from langchain_aws.embeddings.bedrock import BedrockEmbeddings
+from langchain_aws.llms.bedrock import BedrockBase
 
 from ...app.settings import check_required_settings, settings
 from ...common.langchain.bedrock import Bedrock, ChatBedrock
