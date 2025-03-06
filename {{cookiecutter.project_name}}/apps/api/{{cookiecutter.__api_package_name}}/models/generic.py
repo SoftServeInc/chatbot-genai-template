@@ -3,7 +3,7 @@
 from typing import Any, Callable, Optional
 from uuid import UUID, uuid4
 
-from pydantic import HttpUrl, field_validator
+from pydantic import ConfigDict, HttpUrl, field_validator
 from sqlalchemy import String, TypeDecorator
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlmodel import DateTime as SQLDateTime
@@ -13,6 +13,17 @@ from sqlmodel import SQLModel
 from ..common.datetime import datetime, now, to_datetime
 
 TableName = str | Callable[..., str]
+
+
+def general_resource_json_schema_extra(
+    schema: dict[str, dict[str, dict[str, Any]]],
+    cls: type["GenericResource"],
+):
+    """Do not include hidden fields in the schema"""
+    hidden = getattr(cls, "__hidden__", [])
+    schema["properties"] = {
+        k: v for k, v in schema.get("properties", {}).items() if not v.pop("hidden", False) and k not in hidden
+    }
 
 
 class GenericResource(SQLModel):
@@ -34,17 +45,7 @@ class GenericResource(SQLModel):
         schema_extra={"hidden": True},
     )
 
-    class Config:
-        @staticmethod
-        def json_schema_extra(
-            schema: dict[str, dict[str, dict[str, Any]]],
-            cls: type["GenericResource"],
-        ):
-            """Do not include hidden fields in the schema"""
-            hidden = getattr(cls, "__hidden__", [])
-            schema["properties"] = {
-                k: v for k, v in schema.get("properties", {}).items() if not v.pop("hidden", False) and k not in hidden
-            }
+    model_config = ConfigDict(json_schema_extra=general_resource_json_schema_extra)
 
     @field_validator("created_at", "modified_at", "deleted_at", mode="before")
     @classmethod
