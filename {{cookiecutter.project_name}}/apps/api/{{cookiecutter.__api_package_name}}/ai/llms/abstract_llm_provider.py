@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import Any, ClassVar
 
-from langchain.base_language import BaseLanguageModel
+from langchain_core.language_models import BaseLanguageModel
 from langchain.callbacks.base import Callbacks
 from langchain.chat_models.base import BaseChatModel
 from langchain.embeddings.base import Embeddings

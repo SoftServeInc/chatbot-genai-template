@@ -82,7 +82,7 @@ All the LLM providers are subclasses of the `AbstractLLMProvider` class. The cur
   - `_get_stop_sequence` (optional) - returns the sequence of tokens that will be used by the assistant to determine when to stop the response generation.
   - `_get_llm` - returns the LLM provider that will be used by the assistant to generate the response.
 
-  By default, the `AbstractBasicAssistant` class uses the `LLMChain`. However, if it is not enough for your needs, you can override the `_get_chain` method and return any other Langchain chain that the assistant should use.
+  By default, the `AbstractBasicAssistant` class uses the `Runnable` pipe defined in LangChain Express Language. However, if it is not enough for your needs, you can override the `_get_chain` method and return any other Langchain chain that the assistant should use.
 
   After you have overridden the methods mentioned above, you can add a `generate` method to your assistant, which should call either `self._run_buffered(...)` or `self._run_streamed(...)`  methods depending on whether you want to use the "buffered" or "streamed" approach. Keep in mind that if you use the "streamed" approach, then the LLM returned by the `_get_llm` method should support the streaming mode. For more details see the example implementations of `ConversationAssistantBuffered`, `ConversationAssistantStreamed`, and `SubjectLineAssistant` classes.
 
