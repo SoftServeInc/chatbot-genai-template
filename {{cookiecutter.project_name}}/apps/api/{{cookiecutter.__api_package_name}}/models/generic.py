@@ -3,7 +3,7 @@
 from typing import Any, Callable, Optional
 from uuid import UUID, uuid4
 
-from pydantic import ConfigDict, HttpUrl, field_validator
+from pydantic import HttpUrl, field_validator
 from sqlalchemy import String, TypeDecorator
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlmodel import DateTime as SQLDateTime
@@ -45,7 +45,7 @@ class GenericResource(SQLModel):
         schema_extra={"hidden": True},
     )
 
-    model_config = ConfigDict(json_schema_extra=general_resource_json_schema_extra)
+    model_config = {"json_schema_extra": general_resource_json_schema_extra}  # type: ignore[assignment]
 
     @field_validator("created_at", "modified_at", "deleted_at", mode="before")
     @classmethod

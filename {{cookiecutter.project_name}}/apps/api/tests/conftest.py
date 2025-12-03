@@ -12,7 +12,7 @@ from .default_env import DEFAULT_TEST_ENV
 
 for key, value in DEFAULT_TEST_ENV.items():
     os.environ.setdefault(key, value)
-    
+
 from typing import AsyncGenerator
 from uuid import uuid4
 
@@ -46,7 +46,7 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
             "@",
             f"{env_str('DB_HOST', 'localhost')}:{env_str('DB_PORT', '5432')}",
             "/",
-            env_str("DB_NAME", "{{cookiecutter.__api_package_name}}"),
+            env_str("DB_NAME", "{{ cookiecutter.database_name }}"),
             f"?ssl={env_str('DB_SSL_MODE', 'prefer')}",
         ]
     )
@@ -210,7 +210,7 @@ def clean_env():
 
 
 # =============================================================================
-# LLM Mocking Fixtures (for LangChain 1.x testing)
+# LLM Mocking Fixtures (for LCEL/LangChain 1.x testing)
 # =============================================================================
 
 
@@ -225,19 +225,23 @@ def mock_text_llm(mock_llm_response):
     """
     Mock text LLM for testing without API calls.
 
-    Returns a mock that behaves like a LangChain LLM:
-    - Has ainvoke() for async calls (returns dict for LLMChain compatibility)
-    - Has astream() for streaming
+    Returns a mock that behaves like a LangChain LLM for LCEL:
+    - Has ainvoke() for async calls (returns string directly for LCEL)
+    - Has astream() for streaming (yields strings)
     - Has get_num_tokens() for token counting
+    - Supports pipe operator (|) for LCEL chains
     """
     from unittest.mock import AsyncMock, MagicMock
 
     llm = MagicMock()
-    # LLMChain expects ainvoke to return a dict with the output key
-    llm.ainvoke = AsyncMock(return_value={"output": mock_llm_response})
+    # LCEL chains expect ainvoke to return a string directly
+    llm.ainvoke = AsyncMock(return_value=mock_llm_response)
     llm.get_num_tokens = MagicMock(return_value=10)
 
-    # Mock streaming - yields raw strings
+    # Support bind() for stop sequences (used in subject_line_assistant)
+    llm.bind = MagicMock(return_value=llm)
+
+    # Mock streaming - yields strings directly
     async def async_generator():
         for word in mock_llm_response.split():
             yield word + " "
@@ -252,19 +256,20 @@ def mock_chat_llm(mock_llm_response):
     """
     Mock chat LLM for testing without API calls.
 
-    Returns a mock that behaves like a LangChain Chat Model:
-    - Returns dict with output for LLMChain (legacy)
-    - Returns strings for LCEL patterns (modern)
-    - Has ainvoke() and astream()
+    Returns a mock that behaves like a LangChain Chat Model for LCEL:
+    - Returns strings directly from ainvoke() (LCEL pattern)
+    - Has astream() for streaming (yields strings)
+    - Has get_num_tokens() for token counting
+    - Supports pipe operator (|) for LCEL chains
     """
     from unittest.mock import AsyncMock, MagicMock
 
     llm = MagicMock()
 
-    # For legacy chains: ainvoke returns dict
-    llm.ainvoke = AsyncMock(return_value={"output": mock_llm_response})
+    # LCEL chains expect ainvoke to return a string directly
+    llm.ainvoke = AsyncMock(return_value=mock_llm_response)
 
-    # Mock streaming response - yields strings
+    # Mock streaming response - yields strings directly
     async def async_generator():
         for word in mock_llm_response.split():
             yield word + " "
@@ -280,7 +285,7 @@ def mock_llm_provider(mock_text_llm, mock_chat_llm):
     """
     Mock LLM provider for testing assistants.
 
-    This mocks the {{cookiecutter.__api_package_name}}.ai.llms.llm_provider module to avoid real API calls.
+    This mocks the {{ cookiecutter.__api_package_name }}.ai.llms.llm_provider module to avoid real API calls.
     """
     from unittest.mock import MagicMock
 
@@ -308,12 +313,25 @@ def mock_llm_provider_for_imports():
     at module level. This happens at import time before we can mock in individual tests.
 
     This fixture runs once per session and mocks globally before any imports.
-    """
-    from unittest.mock import MagicMock, patch
 
-    # Create simple mock LLMs
+    Updated for LCEL: LLMs return strings directly, not dicts.
+    """
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    # Create simple mock LLMs that work with LCEL
     mock_llm = MagicMock()
     mock_llm.get_num_tokens = MagicMock(return_value=10)
+    # LCEL chains expect ainvoke to return strings directly
+    mock_llm.ainvoke = AsyncMock(return_value="Mocked LCEL response")
+    # Support bind() for stop sequences
+    mock_llm.bind = MagicMock(return_value=mock_llm)
+
+    # Mock streaming for LCEL
+    async def async_generator():
+        yield "Mocked "
+        yield "LCEL "
+        yield "response"
+    mock_llm.astream = MagicMock(return_value=async_generator())
 
     # Create mock provider
     mock_provider = MagicMock()
@@ -324,5 +342,5 @@ def mock_llm_provider_for_imports():
     mock_provider.is_streaming_enabled = MagicMock(return_value=True)
 
     # Patch globally for the entire test session
-    with patch("{{cookiecutter.__api_package_name}}.ai.llms.llm_provider", mock_provider):
+    with patch("{{ cookiecutter.__api_package_name }}.ai.llms.llm_provider", mock_provider):
         yield mock_provider

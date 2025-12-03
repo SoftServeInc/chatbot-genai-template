@@ -15,6 +15,9 @@ from ....app.schemas import (
     PaginationQuery,
     responses,
 )
+{%- if cookiecutter.enable_rag %}
+from ....app.settings import settings
+{%- endif %}
 from ....auth import auth_user_id
 from ....crud import ChatCRUD
 from ....models import Chat, Message
@@ -37,7 +40,20 @@ async def create_chat(
     chat_crud: Annotated[ChatCRUD, Depends()],
 ):
     """Create a new chat"""
-    chat = Chat(user_id=user_id, title=request.data.title, messages=[])
+    {%- if cookiecutter.enable_rag %}
+    # Determine rag_enabled: use provided value or default based on RAG feature being enabled
+    rag_enabled = request.data.rag_enabled
+    if rag_enabled is None:
+        rag_enabled = getattr(settings, "RAG", None) is not None and settings.RAG.enabled
+    {%- endif %}
+    chat = Chat(
+        user_id=user_id,
+        title=request.data.title,
+        messages=[],
+        {%- if cookiecutter.enable_rag %}
+        rag_enabled=rag_enabled,
+        {%- endif %}
+    )
 
     await chat_crud.save(chat, modified=False)
 
@@ -92,6 +108,10 @@ async def update_chat(
     """Update a chat title by its ID"""
     chat = await chat_crud.get_by_id_for_user(chat_id, user_id, raise_not_found=True)
     chat.title = request.data.title
+    {%- if cookiecutter.enable_rag %}
+    if request.data.rag_enabled is not None:
+        chat.rag_enabled = request.data.rag_enabled
+    {%- endif %}
 
     await chat_crud.save(chat)
 

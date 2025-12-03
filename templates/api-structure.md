@@ -14,9 +14,16 @@ The application consists of the following files and directories:
 - [`alembic.ini`](alembic.ini) - the configuration file for Alembic.
 - [`Dockerfile`](Dockerfile) - the `Dockerfile` for building the production-ready Docker image.
 - [`docker-compose.yml`](docker-compose.yml) - the [Docker Compose](https://docs.docker.com/compose/) configuration file for the local development environment.
-- [`docker-compose.sql`](docker-compose.sql) - the SQL initialization script for the local PostgreSQL database.
+- [`docker-compose.sql`](docker-compose.sql) - the SQL initialization script for the local PostgreSQL database.{%- if cookiecutter.enable_rag %} When RAG is enabled, this script also enables the pgvector extension.{%- endif %}
 {%- if cookiecutter.auth == "keycloak" %}
 - [`docker-compose.keycloak-realm.json`](docker-compose.keycloak-realm.json.yaml) - the JSON file with the Keycloak realm configuration for the local environment.
+{%- endif %}
+{%- if cookiecutter.enable_rag %}
+- [`{{ cookiecutter.__api_package_name }}/models/rag_document.py`](./{{ cookiecutter.__api_package_name }}/models/rag_document.py) - the RAG document model with vector embedding support.
+- [`{{ cookiecutter.__api_package_name }}/crud/rag_document_crud.py`](./{{ cookiecutter.__api_package_name }}/crud/rag_document_crud.py) - CRUD operations for RAG documents.
+- [`{{ cookiecutter.__api_package_name }}/routers/v1/rag_documents/`](./{{ cookiecutter.__api_package_name }}/routers/v1/rag_documents/) - the directory containing RAG document API endpoints and services.
+- [`{{ cookiecutter.__api_package_name }}/ai/assistants/conversation_retrieval_assistant.py`](./{{ cookiecutter.__api_package_name }}/ai/assistants/conversation_retrieval_assistant.py) - the retrieval-augmented conversation assistant for RAG-enabled chats.
+- [`{{ cookiecutter.__api_package_name }}/ai/assistants/rag_document_retriever.py`](./{{ cookiecutter.__api_package_name }}/ai/assistants/rag_document_retriever.py) - the document retriever for semantic search.
 {%- endif %}
 - [`gcp-service-account-key.json`](gcp-service-account-key.json) (_git ignored_) - the service account key file for GCP. It is needed and will be used by the application only if you have `LLM_PROVIDER=vertexai` in your `.env` file.
 - [`gcp-service-account-key.json.example`](gcp-service-account-key.json.example) - the example of the service account key file for GCP.

@@ -4,7 +4,7 @@ The technologies used by the generated API application are:
 
 - [FastAPI](https://fastapi.tiangolo.com/) - a modern, high-performance, web framework for building APIs with Python.
 - [PostgreSQL](https://www.postgresql.org/) - the application uses it as a database to store chats, messages, and other data.
-- [pgvector](https://github.com/pgvector/pgvector) - a PostgreSQL extension for storing vector embeddings and running similarity search. (if it was enabled during the project generation)
+- [pgvector](https://github.com/pgvector/pgvector) - a PostgreSQL extension for storing vector embeddings and running similarity search. (if RAG was enabled during the project generation)
 - [SQLModel](https://sqlmodel.tiangolo.com/) - an asynchronous SQL query builder and ORM for Python based on [SQLAlchemy](https://docs.sqlalchemy.org/en/20/).
 - [Alembic](https://alembic.sqlalchemy.org/en/latest/) - a lightweight database migration tool for usage with SQLAlchemy.
 - [Pydantic](https://pydantic-docs.helpmanual.io/) - a data validation and settings management using Python type annotations.

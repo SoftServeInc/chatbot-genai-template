@@ -1,10 +1,16 @@
 """
-This module contains the conversational assistant. It is a simple wrapper around the ConversationChain class.
+Conversation assistant using LCEL (LangChain Expression Language).
+
+This module implements a modern conversational assistant using LangChain's
+Expression Language (LCEL) for composable, streaming-first chains.
 """
 
 from typing import Any, AsyncIterable
 
-from langchain_core.prompts import PromptTemplate
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnablePassthrough
 
 from ...models import Message, MessageRole
 from ..llms import llm_provider
@@ -34,51 +40,108 @@ Current conversation:
 llm_streamed = llm_provider.create_chat_llm(streaming=True)
 llm_buffered = llm_provider.create_chat_llm(streaming=False)
 
+# System prompt for the conversation
+SYSTEM_PROMPT = (
+    "You are a helpful and friendly AI assistant. "
+    "You are talkative and provide lots of specific details from your context. "
+    "If you do not know the answer to a question, you say you do not know. "
+    "Format your responses using newlines in a way that is easy to read."
+)
 
-class ConversationAssistant(AbstractBasicAssistant):
-    """Simple conversational assistant that uses the ConversationChain class to generate responses"""
+# Create the chat prompt template using LCEL
+CHAT_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        SystemMessage(content=SYSTEM_PROMPT),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{question}"),
+    ]
+)
 
-    def _get_prompt_template(self):
-        """Get the prompt template to use"""
-        return PROMPT_TEMPLATE
 
-    def _get_stop_sequence(self):
-        """Get the stop sequence to use"""
-        return STOP_SEQUENCE
+def _convert_messages_to_langchain(messages: list[Message]) -> list[HumanMessage | AIMessage]:
+    """Convert application Message objects to LangChain message format"""
+    langchain_messages: list[HumanMessage | AIMessage] = []
 
-    def _create_inputs(self, question: str, previous_messages: list[Message]) -> dict[str, Any]:
-        """Creates the inputs for the chain"""
+    # Sort by created_at to ensure correct order
+    sorted_messages = sorted(messages, key=lambda m: m.created_at)
+
+    for message in sorted_messages:
+        content = message.content
+        if message.role == MessageRole.USER:
+            langchain_messages.append(HumanMessage(content=content))
+        elif message.role == MessageRole.ASSISTANT:
+            langchain_messages.append(AIMessage(content=content))
+
+    return langchain_messages
+
+
+class ConversationAssistantLCEL:
+    """
+    Base conversation assistant using LCEL (LangChain Expression Language).
+
+    This uses the modern LangChain approach with:
+    - ChatPromptTemplate for structured prompts
+    - Pipe operator (|) for composing chains
+    - Native streaming support
+    """
+
+    def __init__(self, streaming: bool = False):
+        self.streaming = streaming
+        self._llm = llm_provider.create_chat_llm(streaming=streaming)
+        self._chain = self._build_chain()
+
+    def _build_chain(self):
+        """Build the LCEL chain"""
+        return (
+            RunnablePassthrough.assign(chat_history=lambda x: x.get("chat_history", []))
+            | CHAT_PROMPT
+            | self._llm
+            | StrOutputParser()
+        )
+
+    def _prepare_inputs(self, question: str, previous_messages: list[Message]) -> dict[str, Any]:
+        """Prepare inputs for the chain"""
         return {
             "question": question,
-            "chat_history": self._compose_history(question, previous_messages),
+            "chat_history": _convert_messages_to_langchain(previous_messages),
         }
 
-    def _compose_history(self, question: str, previous_messages: list[Message]) -> str:
-        """Get the number of remaining tokens after the inputs are added to the prompt"""
-        llm = self._get_llm()
-        context_without_history = PROMPT_TEMPLATE.format(question=question, chat_history="")
-        max_history_tokens = get_number_of_tokens_left(context_without_history, llm)
 
-        return compose_history(llm, previous_messages, max_history_tokens)
+class ConversationAssistantBuffered(ConversationAssistantLCEL):
+    """
+    Conversation assistant that returns buffered (complete) responses.
 
+    Uses LCEL's ainvoke() for async execution.
+    """
 
-class ConversationAssistantBuffered(ConversationAssistant):
-    """Conversational assistant that uses a buffered LLM"""
-
-    def _get_llm(self):
-        return llm_buffered
+    def __init__(self):
+        super().__init__(streaming=False)
 
     async def generate(self, question: str, previous_messages: list[Message]) -> str:
-        """Generates a buffered response to the given message"""
-        return await self._run_buffered(self._create_inputs(question, previous_messages))
+        """Generate a complete response to the given question"""
+        inputs = self._prepare_inputs(question, previous_messages)
+        response = await self._chain.ainvoke(inputs)
+        return response.strip()
 
 
-class ConversationAssistantStreamed(ConversationAssistant):
-    """Conversational assistant that uses a streamed LLM"""
+class ConversationAssistantStreamed(ConversationAssistantLCEL):
+    """
+    Conversation assistant that streams responses token by token.
 
-    def _get_llm(self):
-        return llm_streamed
+    Uses LCEL's astream() for async streaming.
+    """
 
-    def generate(self, question: str, previous_messages: list[Message]) -> AsyncIterable[str]:
-        """Generates a streamed response to the given message"""
-        return self._run_streamed(self._create_inputs(question, previous_messages))
+    def __init__(self):
+        super().__init__(streaming=True)
+
+    async def generate(self, question: str, previous_messages: list[Message]) -> AsyncIterable[str]:
+        """Generate a streamed response to the given question"""
+        inputs = self._prepare_inputs(question, previous_messages)
+        first_chunk = True
+
+        async for chunk in self._chain.astream(inputs):
+            if first_chunk:
+                # Strip leading whitespace from first chunk
+                chunk = chunk.lstrip()
+                first_chunk = False
+            yield chunk

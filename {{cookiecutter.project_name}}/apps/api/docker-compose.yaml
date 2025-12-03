@@ -1,9 +1,8 @@
-version: "3.9"
 name: "{{ cookiecutter.__api_docker_compose_name }}"
 
 services:
   database:
-    image: {{ 'pgvector/pgvector:0.6.0-pg16' if cookiecutter.enable_pgvector else 'postgres:16.1-bookworm' }}
+    image: {{ 'pgvector/pgvector:0.8.0-pg17' if cookiecutter.enable_rag else 'postgres:17-bookworm' }}
     container_name: {{ cookiecutter.__api_docker_compose_name }}-database
     restart: always
     user: postgres

@@ -28,9 +28,9 @@ a name of the PostgreSQL database that will be used in the generated project. By
 ---
 
 ```
-[4/11] 🏹 Enable PostgreSQL vector extension [y/n] (n):
+[4/11] 🏹 Enable RAG (Retrieval-Augmented Generation) [y/n] (y):
 ```
-whether to enable [pgvector](https://github.com/pgvector/pgvector) extension for the generated project. If your answer `y` (i.e., yes) then the `pgvector` PostgreSQL extension will be enabled and the generated project will be configured to use it. The default value is `n` (i.e., no).
+whether to enable RAG (Retrieval-Augmented Generation) functionality for the generated project. If your answer `y` (i.e., yes) then RAG features will be enabled, including the [pgvector](https://github.com/pgvector/pgvector) PostgreSQL extension for storing vector embeddings, document upload and retrieval capabilities, and enhanced chat assistants that can search through uploaded documents. The default value is `y` (i.e., yes).
 
 ---
 

@@ -21,4 +21,8 @@ The API backend application written in Python.{% if cookiecutter.pip == "poetry"
 
 {% include "api-commands.md" %}
 
+{%- if cookiecutter.enable_rag %}
+{% include "api-rag.md" %}
+{%- endif %}
+
 {% include "api-structure.md" %}

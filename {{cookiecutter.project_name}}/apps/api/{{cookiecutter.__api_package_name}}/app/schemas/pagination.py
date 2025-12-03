@@ -18,14 +18,14 @@ class PaginationQuery:
         self,
         offset: Annotated[
             int,
-            Query(ge=0, example=0, alias="page[offset]", description="The offset of the first item to be returned."),
+            Query(ge=0, examples=[0], alias="page[offset]", description="The offset of the first item to be returned."),
         ] = 0,
         limit: Annotated[
             int,
             Query(
                 ge=0,
                 le=1000,
-                example=10,
+                examples=[10],
                 alias="page[limit]",
                 description="The maximum number of items to be returned; set to 0 fo no limit.",
             ),

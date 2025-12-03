@@ -2,7 +2,7 @@ The technologies used in this project are:
 
 - [FastAPI](https://fastapi.tiangolo.com/) - a modern, high-performance, web framework for building APIs with Python.
 - [PostgreSQL](https://www.postgresql.org/) - the application uses it as a database to store chats, messages, and other data.
-{%- if cookiecutter.enable_pgvector %}
+{%- if cookiecutter.enable_rag %}
 - [pgvector](https://github.com/pgvector/pgvector) - a PostgreSQL extension for storing vector embeddings and running similarity search.
 {%- endif %}
 - [SQLModel](https://sqlmodel.tiangolo.com/) - an asynchronous SQL query builder and ORM for Python based on [SQLAlchemy](https://docs.sqlalchemy.org/en/20/).

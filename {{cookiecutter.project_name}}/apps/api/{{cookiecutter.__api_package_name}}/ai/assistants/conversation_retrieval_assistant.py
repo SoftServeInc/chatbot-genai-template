@@ -1,55 +1,32 @@
 """
-This module contains the conversational assistant. It is a simple wrapper around the ConversationChain class.
+Conversation retrieval assistant using LCEL (LangChain Expression Language).
+
+This module implements a RAG-based conversational assistant using LangChain's
+Expression Language (LCEL) for composable, streaming-first chains with document retrieval.
 """
 
-from typing import AsyncIterable, ClassVar, cast
+from typing import Any, AsyncIterable
 
-from langchain_classic.chains.base import Chain
-from langchain_classic.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain_classic.chains.conversational_retrieval.base import (
-    ConversationalRetrievalChain,
-)
-from langchain_classic.chains.llm import LLMChain
-from langchain_core.prompts import (
-    BasePromptTemplate,
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    PromptTemplate,
-    SystemMessagePromptTemplate,
-)
-from langchain_core.retrievers import BaseRetriever
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnablePassthrough
 
-from ...models import Message
+from ...models import Message, MessageRole
 from ..llms import llm_provider
-from .abstract_assistant import IS_VERBOSE, OUTPUT_KEY, AbstractAssistant
-from .utils import compose_history, get_number_of_tokens_left
+from .rag_document_retriever import RAGDocumentRetriever
 
-# pylint: disable=line-too-long
-CONDENSE_QUESTION_LENGTH = 800
-CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
-    """Given the following conversation between a user and an assisstant, and a user's follow up question, rephrase the follow up question to be a standalone question, in English language.
-The standalone question should be no longer than """
-    + str(CONDENSE_QUESTION_LENGTH)
-    + """ characters.
-
-Conversation:
------
-{chat_history}
------
-Follow up question: {question}
------
-Standalone question: """
-)
-
+# System prompt for RAG-based conversation
 KNOWLEDGE_BASE_SEPARATOR = "=-=-=-=-="
 COMBINE_DOCUMENTS_SEPARATOR = "*-*-*-*-*"
 
-SYSTEM_MESSAGE_TEMPLATE = (
+SYSTEM_PROMPT_TEMPLATE = (
     """You are an assistant that speaks the English language only.
 
 For answering a user's question use only the information below that is delimited by \""""
     + KNOWLEDGE_BASE_SEPARATOR
-    + """\" symbols. We call it a Knowledge Base. The different documents within the Knowledge Base are separated by \""""
+    + """\" symbols. We call it a Knowledge Base. The different documents within the Knowledge Base are """
+    + """separated by \""""
     + COMBINE_DOCUMENTS_SEPARATOR
     + """\" symbols.
 Do not use your general knowledge outside the Knowledge Base to answer the question, i.e., to answer a question, use only information from the Knowledge Base.
@@ -72,120 +49,130 @@ The Knowledge Base:
     + """
 """
 )
-# pylint: enable=line-too-long
 
-COMBINE_DOCUMENTS_PROMPT: BasePromptTemplate[str] = (
-    ChatPromptTemplate.from_messages(
-        [
-            SystemMessagePromptTemplate.from_template(SYSTEM_MESSAGE_TEMPLATE),
-            HumanMessagePromptTemplate.from_template("{question}"),
-        ]
-    )
-    if llm_provider.does_chat_llm_support_system_message()
-    else PromptTemplate.from_template(
-        SYSTEM_MESSAGE_TEMPLATE
-        + """
-Here is the user's question that you need to answer:
-{question}
-"""
-    )
-)
+RESPONSE_IF_NO_DOCS_FOUND = "Sorry, but I don't have any relevant information in my Knowledge Base."
 
 
-llm_streamed = llm_provider.create_chat_llm(streaming=True)
-llm_buffered = llm_provider.create_chat_llm(streaming=False)
+def _convert_messages_to_langchain(messages: list[Message]) -> list[HumanMessage | AIMessage]:
+    """Convert application Message objects to LangChain message format"""
+    langchain_messages: list[HumanMessage | AIMessage] = []
+
+    # Sort by created_at to ensure correct order
+    sorted_messages = sorted(messages, key=lambda m: m.created_at)
+
+    for message in sorted_messages:
+        content = message.content
+        if message.role == MessageRole.USER:
+            langchain_messages.append(HumanMessage(content=content))
+        elif message.role == MessageRole.ASSISTANT:
+            langchain_messages.append(AIMessage(content=content))
+
+    return langchain_messages
 
 
-class ConversationRetrievalAssistant(AbstractAssistant):
-    """Simple conversational assistant that uses the ConversationChain class to generate responses"""
+def _format_documents(documents: list) -> str:
+    """Format retrieved documents into a single context string"""
+    if not documents:
+        return RESPONSE_IF_NO_DOCS_FOUND
 
-    RESPONSE_IF_NO_DOCS_FOUND: ClassVar[str] = "Sorry, but I don't have any relevant information in my Knowledge Base."
+    formatted_docs = []
+    for doc in documents:
+        formatted_docs.append(doc.page_content)
 
-    def _get_llm_for_condensing(self):
-        """Use a buffered LLM for condensing questions chain because it is called before the combine documents chain and its response is not returned to the user directly"""
-        return llm_buffered
+    return f"\n\n{COMBINE_DOCUMENTS_SEPARATOR}\n\n".join(formatted_docs)
 
-    def _configure(self, documents_retriever: BaseRetriever, question: str, previous_messages: list[Message]):
-        """Configure the chain and its inputs"""
-        llm = self._get_llm()
-        llm_for_condensing = self._get_llm_for_condensing()
 
-        condense_question_chain = LLMChain(
-            llm=llm_for_condensing,
-            prompt=CONDENSE_QUESTION_PROMPT,
-            verbose=IS_VERBOSE,
+class ConversationRetrievalAssistantLCEL:
+    """
+    Base conversation retrieval assistant using LCEL (LangChain Expression Language).
+
+    This uses the modern LangChain approach with:
+    - Document retrieval via RAGDocumentRetriever
+    - ChatPromptTemplate for structured prompts
+    - Pipe operator (|) for composing chains
+    - Native streaming support
+    """
+
+    def __init__(self, retriever: RAGDocumentRetriever, streaming: bool = False):
+        """
+        Initialize the retrieval assistant.
+
+        Args:
+            retriever: RAGDocumentRetriever instance for document retrieval
+            streaming: Whether to use streaming mode
+        """
+        self.streaming = streaming
+        self.retriever = retriever
+        self._llm = llm_provider.create_chat_llm(streaming=streaming)
+        self._chain = self._build_chain()
+
+    def _build_chain(self):
+        """Build the LCEL chain with retrieval"""
+        # Create prompt template
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                SystemMessage(content=SYSTEM_PROMPT_TEMPLATE),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{question}"),
+            ]
         )
 
-        combine_docs_chain = StuffDocumentsChain(
-            llm_chain=LLMChain(
-                llm=llm,
-                prompt=COMBINE_DOCUMENTS_PROMPT,
-                verbose=IS_VERBOSE,
-            ),
-            document_separator=f"\n\n{COMBINE_DOCUMENTS_SEPARATOR}\n\n",
-            document_variable_name="context",
-            verbose=IS_VERBOSE,
+        # Build chain: retrieve -> format context -> prompt -> LLM -> parse
+        return (
+            RunnablePassthrough.assign(context=lambda x: _format_documents(x.get("documents", [])))
+            | RunnablePassthrough.assign(chat_history=lambda x: x.get("chat_history", []))
+            | prompt
+            | self._llm
+            | StrOutputParser()
         )
 
-        chain = ConversationalRetrievalChain(
-            retriever=documents_retriever,
-            question_generator=condense_question_chain,
-            combine_docs_chain=combine_docs_chain,
-            return_generated_question=False,
-            return_source_documents=False,
-            max_tokens_limit=self._get_combined_docs_max_tokens(),
-            get_chat_history=lambda _: self._compose_history(question, previous_messages),
-            response_if_no_docs_found=self.RESPONSE_IF_NO_DOCS_FOUND,
-            output_key=OUTPUT_KEY,
-            verbose=IS_VERBOSE,
-        )
+    async def _prepare_inputs(self, question: str, previous_messages: list[Message]) -> dict[str, Any]:
+        """Prepare inputs for the chain including document retrieval"""
+        # Retrieve relevant documents
+        documents = await self.retriever.ainvoke(question)
 
-        # we don't need to pass the actual chat history here because it is returned by the get_chat_history function above
-        inputs = {"question": question, "chat_history": []}
-
-        return chain, inputs
-
-    def _get_response_chain(self, chain: Chain) -> Chain:
-        """Get the response chain from the main chain configured above"""
-        return cast(ConversationalRetrievalChain, chain).combine_docs_chain
-
-    def _compose_history(self, question: str, previous_messages: list[Message]) -> str:
-        """Get the number of remaining tokens after the inputs are added to the prompt"""
-        llm = self._get_llm_for_condensing()
-        context_without_history = CONDENSE_QUESTION_PROMPT.format(question=question, chat_history="")
-        max_history_tokens = get_number_of_tokens_left(context_without_history, llm)
-
-        return compose_history(llm, previous_messages, max_history_tokens)
-
-    def _get_combined_docs_max_tokens(self) -> int:
-        context_without_docs = COMBINE_DOCUMENTS_PROMPT.format(question="", context="")
-        max_combined_docs_tokens = get_number_of_tokens_left(context_without_docs, self._get_llm())
-        question_tokens = CONDENSE_QUESTION_LENGTH // 4
-
-        return max_combined_docs_tokens - question_tokens
+        return {
+            "question": question,
+            "chat_history": _convert_messages_to_langchain(previous_messages),
+            "documents": documents,
+        }
 
 
-class ConversationRetrievalAssistantBuffered(ConversationRetrievalAssistant):
-    """Conversational assistant that uses a buffered LLM"""
+class ConversationRetrievalAssistantBuffered(ConversationRetrievalAssistantLCEL):
+    """
+    Conversation retrieval assistant that returns buffered (complete) responses.
 
-    def _get_llm(self):
-        return llm_buffered
+    Uses LCEL's ainvoke() for async execution.
+    """
 
-    async def generate(
-        self, documents_retriever: BaseRetriever, question: str, previous_messages: list[Message]
-    ) -> str:
-        """Generates a buffered response to the given message"""
-        return await self._run_chain_buffered(*self._configure(documents_retriever, question, previous_messages))
+    def __init__(self, retriever: RAGDocumentRetriever):
+        super().__init__(retriever, streaming=False)
+
+    async def generate(self, question: str, previous_messages: list[Message]) -> str:
+        """Generate a complete response to the given question using RAG"""
+        inputs = await self._prepare_inputs(question, previous_messages)
+        response = await self._chain.ainvoke(inputs)
+        return response.strip()
 
 
-class ConversationRetrievalAssistantStreamed(ConversationRetrievalAssistant):
-    """Conversational assistant that uses a streamed LLM"""
+class ConversationRetrievalAssistantStreamed(ConversationRetrievalAssistantLCEL):
+    """
+    Conversation retrieval assistant that streams responses token by token.
 
-    def _get_llm(self):
-        return llm_streamed
+    Uses LCEL's astream() for async streaming.
+    """
 
-    def generate(
-        self, documents_retriever: BaseRetriever, question: str, previous_messages: list[Message]
-    ) -> AsyncIterable[str]:
-        """Generates a streamed response to the given message"""
-        return self._run_chain_streamed(*self._configure(documents_retriever, question, previous_messages))
+    def __init__(self, retriever: RAGDocumentRetriever):
+        super().__init__(retriever, streaming=True)
+
+    async def generate(self, question: str, previous_messages: list[Message]) -> AsyncIterable[str]:
+        """Generate a streamed response to the given question using RAG"""
+        inputs = await self._prepare_inputs(question, previous_messages)
+        first_chunk = True
+
+        async for chunk in self._chain.astream(inputs):
+            if first_chunk:
+                # Strip leading whitespace from first chunk
+                chunk = chunk.lstrip()
+                first_chunk = False
+            yield chunk

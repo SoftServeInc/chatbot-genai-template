@@ -1,7 +1,7 @@
 """Settings module to store all configuration variables passed to the application via environment variables"""
 
 # pylint: disable=missing-class-docstring
-from ..common.environ import env_bool, env_int, env_str
+from ..common.environ import env_bool, env_float, env_int, env_str
 from ..common.utils import parse_csv_string, rgetattr
 
 __all__ = ["settings", "check_required_settings"]
@@ -45,6 +45,16 @@ class Settings:
         verbose: bool = env_bool("LLM_VERBOSE", False)
         text_max_tokens: int = env_int("LLM_TEXT_MAX_TOKENS", 4096)
         chat_max_tokens: int = env_int("LLM_CHAT_MAX_TOKENS", 4096)
+    {%- if cookiecutter.enable_rag %}
+
+    class RAG:
+        enabled: bool = env_bool("RAG_ENABLED", True)
+        embedding_dimensions: int = env_int("RAG_EMBEDDING_DIMENSIONS", 1536)  # Azure OpenAI text-embedding-ada-002
+        chunk_size: int = env_int("RAG_CHUNK_SIZE", 1000)
+        chunk_overlap: int = env_int("RAG_CHUNK_OVERLAP", 200)
+        max_file_size_mb: int = env_int("RAG_MAX_FILE_SIZE_MB", 10)
+        allowed_extensions: str = env_str("RAG_ALLOWED_EXTENSIONS", ".txt,.pdf,.docx,.doc")
+    {%- endif %}
 
     class Azure:
         class OpenAI:

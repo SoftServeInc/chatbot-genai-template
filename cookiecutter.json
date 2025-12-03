@@ -2,7 +2,7 @@
   "project_title": "Example Chatbot",
   "project_name": "{{ cookiecutter.project_title|lower|replace(' ', '-') }}",
   "database_name": "{{ cookiecutter.project_name|replace('-', '_') }}",
-  "enable_pgvector": false,
+  "enable_rag": true,
   "enable_mypy": true,
   "pip": [
     "poetry",
@@ -61,7 +61,7 @@
     "project_title": "👀 Project title (human readable)",
     "project_name": "🎫 Project name (kebab-case)",
     "database_name": "💿 PostgreSQL database name (snake_case)",
-    "enable_pgvector": "🏹 Enable PostgreSQL vector extension",
+    "enable_rag": "🏹 Enable RAG (Retrieval-Augmented Generation)",
     "enable_mypy": "🚨 Enable MyPy type checking",
     "pip": {
       "__prompt__": "🐍 Python dependencies management:",
