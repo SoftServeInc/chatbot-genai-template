@@ -11,7 +11,7 @@ The template allows you to quickly bootstrap a new project with the following fe
 
 - 🐍 Python Backend API-only **or** API + 🌐 React.js Web UI project structure and configurations according to the best practices.
 - 📜 Documented API endpoints and integrated Web UI application providing basic conversational AI capabilities.
-- 💿 PostgreSQL database and migrations for chats data persistence + (optionally) RAG (Retrieval-Augmented Generation) with [pgvector](https://github.com/pgvector/pgvector) extension for document retrieval.
+- 💿 PostgreSQL database and migrations for chats data persistence + (enabled by default) RAG (Retrieval-Augmented Generation) with [pgvector](https://github.com/pgvector/pgvector) extension for document retrieval.
 - 🔐 Keycloak identity provider for user authentication and authorization (optionally).
 - 🎨 UI Kit (+ [Storybook](https://storybook.js.org/)) consisting of a bunch of React components and styles for evolving/adapting the Web UI application to your needs.
 - 💻 Fully functional local development environment based on Docker Compose, either using either Docker engine or [Podman](https://podman.io/).
