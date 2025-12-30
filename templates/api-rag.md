@@ -21,7 +21,7 @@ The following environment variables can be configured for RAG functionality:
 - `RAG_CHUNK_SIZE` - Text chunk size for document processing (default: `1000`)
 - `RAG_CHUNK_OVERLAP` - Overlap between chunks (default: `200`)
 - `RAG_MAX_FILE_SIZE_MB` - Maximum file size for uploads in MB (default: `10`)
-- `RAG_ALLOWED_EXTENSIONS` - Comma-separated list of allowed file extensions (default: `.txt,.pdf,.docx,.doc`)
+- `RAG_ALLOWED_EXTENSIONS` - Comma-separated list of allowed file extensions (default: `.txt,.pdf,.docx`)
 
 ### API Endpoints
 
@@ -29,6 +29,7 @@ When RAG is enabled, the following endpoints are available under `/api/v1/rag/do
 
 - `POST /create` - Create a new RAG document from text content
 - `POST /upload` - Upload a file (txt, pdf, docx) and create a RAG document
+  - **Note**: PDF files only extract text content. Images, tables, and other non-text elements are not extracted.
 - `GET /` - Get a paginated list of all RAG documents
 - `GET /{document_id}` - Get a single RAG document by ID
 - `PATCH /{document_id}` - Update a RAG document's title, content, or metadata (regenerates embedding if content changed)
