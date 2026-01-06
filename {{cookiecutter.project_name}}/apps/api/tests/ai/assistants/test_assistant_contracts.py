@@ -189,34 +189,3 @@ class TestLCELMockingPatterns:
         # LCEL chains should have ainvoke and astream methods
         assert callable(chain.ainvoke)
         assert callable(chain.astream)
-
-    def test_pattern_integration_test_marker(self):
-        """
-        PATTERN: Mark execution tests as integration tests.
-
-        Use @pytest.mark.integration for tests that require real LLMs.
-        These can be skipped in CI or run separately with credentials.
-        """
-        # This test just demonstrates the pattern - it doesn't run anything
-
-        # Example of how you'd structure an LCEL integration test:
-        #
-        # @pytest.mark.integration
-        # async def test_lcel_assistant_generates_response_integration():
-        #     assistant = ConversationAssistantBuffered()
-        #     response = await assistant.generate("Hello", [])
-        #     assert isinstance(response, str)
-        #     assert len(response) > 0
-        #
-        # @pytest.mark.integration
-        # async def test_lcel_assistant_streams_response_integration():
-        #     assistant = ConversationAssistantStreamed()
-        #     chunks = []
-        #     async for chunk in assistant.generate("Hello", []):
-        #         chunks.append(chunk)
-        #     assert len(chunks) > 0
-        #     assert isinstance(chunks[0], str)
-        #
-        # Run with: pytest -m integration
-
-        pass  # This is just documentation

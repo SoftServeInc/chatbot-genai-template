@@ -30,7 +30,7 @@ def parse_pdf_file(content: bytes) -> str:
         return "\n\n".join(text_parts)
 
     except Exception as e:
-        logger.error("Failed to parse PDF: %s", e)
+        logger.exception("Failed to parse PDF: %s", e)
         raise ValueError(f"Failed to parse PDF file: {e}") from e
 
 
@@ -58,7 +58,7 @@ def parse_docx_file(content: bytes) -> str:
         return "\n\n".join(text_parts)
 
     except Exception as e:
-        logger.error("Failed to parse DOCX: %s", e)
+        logger.exception("Failed to parse DOCX: %s", e)
         raise ValueError(f"Failed to parse DOCX file: {e}") from e
 
 
