@@ -65,6 +65,18 @@ def cleanup_api() -> None:
     if "{{ cookiecutter.auth }}" != "local":
         remove_file("apps", "api", "{{  cookiecutter.__api_package_name }}", "auth", "local_authenticator.py")
         remove_file("apps", "api", "users.yaml.example")
+        remove_file("apps", "api", "tests", "auth", "test_authenticator_contracts.py")
+
+    # RAG cleanup
+    if "{{ cookiecutter.enable_rag }}" != "True":
+        remove_file("apps", "api", "{{ cookiecutter.__api_package_name }}", "models", "rag_document.py")
+        remove_tree("apps", "api", "{{ cookiecutter.__api_package_name }}", "routers", "v1", "rag_documents")
+        remove_file("apps", "api", "{{ cookiecutter.__api_package_name }}", "ai", "assistants", "conversation_retrieval_assistant.py")
+        remove_file("apps", "api", "{{ cookiecutter.__api_package_name }}", "ai", "assistants", "rag_document_retriever.py")
+        remove_file("apps", "api", "{{ cookiecutter.__api_package_name }}", "crud", "rag_document_crud.py")
+        remove_file("apps", "api", "tests", "ai", "assistants", "test_rag_assistant_contracts.py")
+        remove_file("apps", "api", "tests", "crud", "test_rag_document_crud_contract.py")
+        remove_file("docs", "RAG_IMPLEMENTATION.md")
 
 
 def cleanup_web() -> None:

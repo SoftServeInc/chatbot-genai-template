@@ -2,7 +2,7 @@
 
 from functools import cache
 from typing import AsyncGenerator
-{% if cookiecutter.enable_pgvector %}
+{% if cookiecutter.enable_rag %}
 from asyncpg.connection import Connection
 from pgvector.asyncpg import register_vector
 from sqlalchemy import AdaptedConnection, event, util
@@ -12,10 +12,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from ..common.environ import env_bool, env_str
 
-{% if cookiecutter.terraform_cloud_provider == 'gcp' %}
-GCP_CLOUDSQL = env_str("DB_INSTANCE_CONNECTION_NAME", "")
-  # GCP Cloud SQL instance connection name
-{%- endif %}
+{%- if cookiecutter.terraform_cloud_provider == 'gcp' %}
+GCP_CLOUDSQL = env_str("DB_INSTANCE_CONNECTION_NAME", "")  # GCP Cloud SQL instance connection name
+{% endif %}
+
+
 def _get_database_url() -> str:
     """Build database URL from environment variables"""
     return "".join(
@@ -40,22 +41,19 @@ def _get_database_url() -> str:
 def get_engine() -> AsyncEngine:
     """Create an asynchronous database engine"""
     database_url = _get_database_url()
-    engine = create_async_engine(database_url, echo=env_bool("DB_ECHO", False), future=True)
-    {%- if cookiecutter.enable_pgvector %}
+    engine = create_async_engine(database_url, echo=env_bool("DB_ECHO", False))
+    {%- if cookiecutter.enable_rag %}
     event.listen(engine.pool, "connect", _enable_vector_for_connection)
     {%- endif %}
     return engine
 
-
-{%- if cookiecutter.enable_pgvector %}
+{%- if cookiecutter.enable_rag %}
 
 
 def _enable_vector_for_connection(conn: AdaptedConnection, _):
     """Enable pgvector for a database connection"""
     asyncpg_connection: Connection = conn._connection  # pylint: disable=protected-access
     util.await_only(register_vector(asyncpg_connection))
-
-
 {%- endif %}
 
 

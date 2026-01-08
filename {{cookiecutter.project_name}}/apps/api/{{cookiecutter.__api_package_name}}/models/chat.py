@@ -14,6 +14,9 @@ class ChatBase(GenericResource):
 
     user_id: str = SQLField()
     title: str = SQLField(default="")
+    {%- if cookiecutter.enable_rag %}
+    rag_enabled: bool = SQLField(default=False)
+    {%- endif %}
 
 
 class Chat(ChatBase, table=True):

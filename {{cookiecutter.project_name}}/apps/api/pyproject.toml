@@ -17,37 +17,43 @@ packages = [{ include = "{{ cookiecutter.__api_package_name }}" }]
 python = ">=3.11, <3.14"
 pydantic = "^2.10"
 python-dotenv = "^1.0.1"
-fastapi = "^0.115.0"
+fastapi = "^0.123.0"
 # LangChain 1.x ecosystem - Latest versions
 langchain = "^1.1"  # Latest: 1.1.0
 langchain-core = "^1.1"  # Latest: 1.1.0
 langchain-community = "^0.4"  # Latest: 0.4.1 (no 1.0 yet)
 langchain-classic = "^1.0"  # For legacy chains (LLMChain, ConversationalRetrievalChain)
 langgraph = "^1.0"  # Modern agent framework - Latest: 1.0.4
-uvicorn = "^0.32.0"
+uvicorn = "^0.38.0"
 pyjwt = "^2.9.0"
 pyyaml = "^6.0.2"
-python-multipart = "^0.0.12"
+python-multipart = "^0.0.20"
 {%- if cookiecutter.auth == "local" %}
-argon2-cffi = "^23.1.0"
+argon2-cffi = "^25.1.0"
 {%- elif cookiecutter.auth == "keycloak" %}
 python-keycloak = "^4.0.0"
 {%- endif %}
 # Database dependencies (PostgreSQL)
 asyncpg = "^0.30.0"
-{%- if cookiecutter.enable_pgvector %}
+{%- if cookiecutter.enable_rag %}
 pgvector = "^0.3.5"
 {%- endif %}
 sqlmodel = "^0.0.22"
 sqlalchemy = { version = "^2.0.35", extras = ["asyncio"] }
 # LLM Provider integrations (LangChain 1.x compatible)
-langchain-openai = "^0.3"
-langchain-google-vertexai = "^2.1"
-langchain-aws = "^1.1"  # Latest: 1.1.0
+langchain-openai = "^1.1"
+langchain-google-vertexai = "^3.1"
+langchain-aws = "^1.1"
 boto3 = "^1.40.0"
 botocore = "^1.40.0"
-anthropic = "^0.39.0"
+anthropic = "^0.75.0"
 transformers = "^4.46.0"
+{%- if cookiecutter.enable_rag %}
+# RAG document parsing dependencies (optional)
+pypdf = "^5.1.0"  # PDF parsing
+python-docx = "^1.1.0"  # DOCX parsing
+{%- endif %}
+google-cloud-storage = ">=3.0"
 
 [tool.poetry.group.dev.dependencies]
 alembic = "^1.13.3"
@@ -59,10 +65,10 @@ pre-commit = "^4.0.0"
 {%- endif %}
 pylint = "^3.3.0"
 pytest = "^8.3.0"
-pytest-asyncio = "^0.24.0"
-pytest-cov = "^5.0.0"
-isort = "^5.13.2"
-black = "^24.10.0"
+pytest-asyncio = "^0.26.0"
+pytest-cov = "^6.0.0"
+isort = "^6.0.0"
+black = "^25.1.0"
 flake8 = "^7.1.0"
 types-pyyaml = "^6.0.12.20240917"
 boto3-stubs = "^1.40.0"
@@ -83,37 +89,43 @@ requires-python = ">=3.11, <3.14"
 dependencies = [
   "pydantic>=2.10, <3",
   "python-dotenv>=1.0.1, <2",
-  "fastapi>=0.115.0, <0.116",
-  # LangChain 1.x ecosystem - Latest versions
+  "fastapi>=0.123.0, <0.124",
+  # LangChain 1.x ecosystem
   "langchain>=1.1, <1.2",
   "langchain-core>=1.1, <1.2",
   "langchain-community>=0.4, <0.5",
   "langchain-classic>=1.0, <1.1",
   "langgraph>=1.0, <1.1",
-  "uvicorn>=0.32.0, <0.33",
+  "uvicorn>=0.38.0, <0.39",
   "pyjwt>=2.9.0, <3",
   "pyyaml>=6.0.2, <7",
-  "python-multipart>=0.0.12, <0.1",
+  "python-multipart>=0.0.20, <0.1",
   {%- if cookiecutter.auth == "local" %}
-  "argon2-cffi>=23.1.0, <24",
+  "argon2-cffi>=25.1.0, <26",
   {%- elif cookiecutter.auth == "keycloak" %}
   "python-keycloak>=4.0.0, <5",
   {%- endif %}
   # Database dependencies (PostgreSQL)
-  "asyncpg>=0.29.0, <0.30",
-  {%- if cookiecutter.enable_pgvector %}
+  "asyncpg>=0.30.0, <0.31",
+  {%- if cookiecutter.enable_rag %}
   "pgvector>=0.3.5, <0.4",
   {%- endif %}
   "sqlmodel>=0.0.22, <0.1",
   "sqlalchemy[asyncio]>=2.0.35, <2.1",
   # LLM Provider integrations (LangChain 1.x compatible)
-  "langchain-openai>=0.3, <0.4",
-  "langchain-google-vertexai>=2.1, <3",
+  "langchain-openai>=1.1, <1.2",
+  "langchain-google-vertexai>=3.1, <4",
   "langchain-aws>=1.1, <1.2",
-  "boto3>=1.40.0, <1.41",
-  "botocore>=1.40.0, <1.41",
-  "anthropic>=0.39.0, <0.40",
+  "boto3>=1.40.0, <2",
+  "botocore>=1.40.0, <2",
+  "anthropic>=0.75.0, <1",
   "transformers>=4.46.0, <5",
+  {%- if cookiecutter.enable_rag %}
+  # RAG document parsing dependencies (optional)
+  "pypdf>=5.1.0, <6",
+  "python-docx>=1.1.0, <2",
+  {%- endif %}
+  "google-cloud-storage>=3.0",
 ]
 
 [project.optional-dependencies]
@@ -127,13 +139,13 @@ dev = [
   {%- endif %}
   "pylint>=3.3.0, <4",
   "pytest>=8.3.0, <9",
-  "pytest-asyncio>=0.24.0, <0.25",
-  "pytest-cov>=5.0.0, <6",
-  "isort>=5.13.2, <6",
-  "black>=24.10.0, <25",
+  "pytest-asyncio>=0.26.0, <0.27",
+  "pytest-cov>=6.0.0, <7",
+  "isort>=6.0.0, <7",
+  "black>=25.1.0, <26",
   "flake8>=7.1.0, <8",
   "types-pyyaml>=6.0.12.20240917",
-  "boto3-stubs>=1.40.0, <1.41",
+  "boto3-stubs>=1.40.0, <2",
 ]
 
 [tool.setuptools.packages.find]
@@ -163,7 +175,7 @@ no_implicit_reexport = false
 # disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["asyncpg.*"{% if cookiecutter.enable_pgvector %}, "pgvector.*"{% endif %}{% if cookiecutter.auth == "keycloak" %}, "jwcrypto.*", "keycloak.*"{% endif %}]
+module = ["asyncpg.*"{% if cookiecutter.enable_rag %}, "pgvector.*"{% endif %}{% if cookiecutter.auth == "keycloak" %}, "jwcrypto.*", "keycloak.*"{% endif %}]
 ignore_missing_imports = true
 
 [tool.pydantic-mypy]

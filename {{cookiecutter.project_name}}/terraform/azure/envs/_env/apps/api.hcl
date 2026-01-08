@@ -38,7 +38,7 @@ inputs = {
   domain_name = local.domain_name
 
   db_name            = "{{ cookiecutter.database_name }}"
-  db_enable_pgvector = {{ "true" if cookiecutter.enable_pgvector else "false" }}
+  db_enable_pgvector = {{ "true" if cookiecutter.enable_rag else "false" }}
 
   {%- if cookiecutter.auth == "keycloak" %}
 

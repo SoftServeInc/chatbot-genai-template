@@ -1,8 +1,10 @@
 """API router for Chat related endpoints"""
 
+from __future__ import annotations
+
 from asyncio import CancelledError
 from logging import getLogger
-from typing import Annotated, AsyncGenerator
+from typing import Annotated, Any, AsyncGenerator, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Security
@@ -12,13 +14,20 @@ from starlette.background import BackgroundTask
 from .....ai import (
     ConversationAssistantBuffered,
     ConversationAssistantStreamed,
+    {%- if cookiecutter.enable_rag %}
+    ConversationRetrievalAssistantBuffered,
+    ConversationRetrievalAssistantStreamed,
+    {%- endif %}
     llm_provider,
 )
+{%- if cookiecutter.enable_rag %}
+from .....ai.assistants.rag_document_retriever import RAGDocumentRetriever
+{%- endif %}
 from .....app.exceptions import NotImplementedException
 from .....app.schemas import DataRequest, JSONDataResponse, responses
 from .....auth import auth_user_id
 from .....common.sse import SSE_CONTENT_TYPE, sse_event
-from .....crud import ChatCRUD, MessageCRUD
+from .....crud import ChatCRUD, MessageCRUD{%- if cookiecutter.enable_rag %}, RAGDocumentCRUD{%- endif %}
 from .....models import Message, MessageRole, MessageSegment, MessageSegmentType
 from .models import ConverseChat, ConverseUserMessage
 
@@ -27,9 +36,51 @@ logger = getLogger(__name__)
 converse = APIRouter()
 
 
+{%- if cookiecutter.enable_rag %}
+
+
+def get_buffered_assistant(
+    rag_enabled: bool = False,
+    document_crud: RAGDocumentCRUD | None = None,
+) -> ConversationAssistantBuffered | ConversationRetrievalAssistantBuffered:
+    """Get the appropriate buffered assistant based on RAG enabled flag"""
+    if rag_enabled:
+        if document_crud is None:
+            raise ValueError("RAGDocumentCRUD is required when RAG is enabled")
+        retriever = RAGDocumentRetriever(document_crud)
+        return ConversationRetrievalAssistantBuffered(retriever)
+    return ConversationAssistantBuffered()
+
+
+def get_streamed_assistant(
+    rag_enabled: bool = False,
+    document_crud: RAGDocumentCRUD | None = None,
+) -> ConversationAssistantStreamed | ConversationRetrievalAssistantStreamed:
+    """Get the appropriate streamed assistant based on RAG enabled flag"""
+    if rag_enabled:
+        if document_crud is None:
+            raise ValueError("RAGDocumentCRUD is required when RAG is enabled")
+        retriever = RAGDocumentRetriever(document_crud)
+        return ConversationRetrievalAssistantStreamed(retriever)
+    return ConversationAssistantStreamed()
+{%- else %}
+
+
+def get_buffered_assistant() -> ConversationAssistantBuffered:
+    """Get the buffered assistant"""
+    return ConversationAssistantBuffered()
+
+
+def get_streamed_assistant() -> ConversationAssistantStreamed:
+    """Get the streamed assistant"""
+    return ConversationAssistantStreamed()
+{%- endif %}
+
+
 @converse.post(
     "/chats/{chat_id}/converse",
-    responses=(
+    responses=cast(
+        dict[int | str, dict[str, Any]],
         responses(401, 403, 404, 422)
         | {
             200: {
@@ -76,7 +127,7 @@ converse = APIRouter()
                     }
                 },
             }
-        }
+        },
     ),
 )
 async def chat_converse_buffered(  # pylint: disable=too-many-positional-arguments
@@ -85,10 +136,27 @@ async def chat_converse_buffered(  # pylint: disable=too-many-positional-argumen
     request: DataRequest[ConverseChat],
     chat_crud: Annotated[ChatCRUD, Depends()],
     message_crud: Annotated[MessageCRUD, Depends()],
-    assistant: Annotated[ConversationAssistantBuffered, Depends()],
+    {%- if cookiecutter.enable_rag %}
+    document_crud: Annotated[RAGDocumentCRUD, Depends()],
+    {%- endif %}
 ):
-    """Converse with the assistant in a chat returing the buffered response - i.e., the complete response is returned at once."""
+    """
+    Converse with the assistant in a chat returning the buffered response.
+
+    The complete response is returned at once.
+    {%- if cookiecutter.enable_rag %}
+    The assistant type (RAG-enabled or generic) is determined by the chat's `rag_enabled` field.
+    {%- endif %}
+    """
     chat = await chat_crud.get_by_id_for_user(chat_id, user_id, include_messages=True, raise_not_found=True)
+    {%- if cookiecutter.enable_rag %}
+    rag_enabled = getattr(chat, "rag_enabled", False)
+    assistant = get_buffered_assistant(rag_enabled, document_crud)
+    logger.info("Converse completed using %s assistant", "RAG" if rag_enabled else "generic")
+    {%- else %}
+    assistant = get_buffered_assistant()
+    logger.info("Converse completed using generic assistant")
+    {%- endif %}
 
     user_message_content = request.data.text
     user_message_segment = MessageSegment(MessageSegmentType.TEXT, user_message_content)
@@ -96,7 +164,11 @@ async def chat_converse_buffered(  # pylint: disable=too-many-positional-argumen
 
     assistant_message_content = await assistant.generate(user_message_content, chat.messages)
     assistant_message_segment = MessageSegment(MessageSegmentType.TEXT, assistant_message_content)
-    assistant_message = Message(chat_id=chat.id, role=MessageRole.ASSISTANT, segments=[assistant_message_segment])
+    assistant_message = Message(
+        chat_id=chat.id,
+        role=MessageRole.ASSISTANT,
+        segments=[assistant_message_segment],
+    )
 
     await message_crud.save_all(user_message, assistant_message, modified=False)
 
@@ -144,19 +216,43 @@ async def chat_converse_stream(  # pylint: disable=too-many-positional-arguments
     request: DataRequest[ConverseChat],
     chat_crud: Annotated[ChatCRUD, Depends()],
     message_crud: Annotated[MessageCRUD, Depends()],
-    assistant: Annotated[ConversationAssistantStreamed, Depends()],
+    {%- if cookiecutter.enable_rag %}
+    document_crud: Annotated[RAGDocumentCRUD, Depends()],
+    {%- endif %}
 ):
-    """Converse with the assistant in a chat returing the streamed response - i.e., the response is streamed as it is generated."""
+    """
+    Converse with the assistant in a chat returning the streamed response.
 
+    The response is streamed as it is generated.
+    {%- if cookiecutter.enable_rag %}
+    The assistant type (RAG-enabled or generic) is determined by the chat's `rag_enabled` field.
+    {%- endif %}
+    """
     # Streaming is not supported yet for GCP VertexAI: https://github.com/langchain-ai/langchain/pull/13650
     if llm_provider.NAME == "vertexai":
         raise NotImplementedException("Streaming is not supported yet for GCP VertexAI")
 
     chat = await chat_crud.get_by_id_for_user(chat_id, user_id, include_messages=True, raise_not_found=True)
+    {%- if cookiecutter.enable_rag %}
+    rag_enabled = getattr(chat, "rag_enabled", False)
+    assistant = get_streamed_assistant(rag_enabled, document_crud)
+    logger.info(
+        "Converse stream started using %s assistant",
+        "RAG" if rag_enabled else "generic",
+    )
+    {%- else %}
+    assistant = get_streamed_assistant()
+    logger.info("Converse stream started using generic assistant")
+    {%- endif %}
 
     user_message_content = request.data.text
     user_message_segment = MessageSegment(MessageSegmentType.TEXT, user_message_content)
-    user_message = Message(chat_id=chat.id, role=MessageRole.USER, in_progress=True, segments=[user_message_segment])
+    user_message = Message(
+        chat_id=chat.id,
+        role=MessageRole.USER,
+        in_progress=True,
+        segments=[user_message_segment],
+    )
 
     assistant_message = Message(chat_id=chat.id, role=MessageRole.ASSISTANT, in_progress=True, segments=[])
 
@@ -195,7 +291,12 @@ class _StreamHandler:
     assistant_message_content: str
     assistant_message_id: str
 
-    def __init__(self, message_crud: MessageCRUD, user_message: Message, assistant_message: Message) -> None:
+    def __init__(
+        self,
+        message_crud: MessageCRUD,
+        user_message: Message,
+        assistant_message: Message,
+    ) -> None:
         self.message_crud = message_crud
         self.message_saved = False
 
@@ -216,7 +317,13 @@ class _StreamHandler:
             yield sse_event(user_message, "message") + sse_event(self.assistant_message, "message")
 
         self.assistant_message_content += chunk
-        yield sse_event({"message_id": self.assistant_message_id, "segment": MessageSegment.text(chunk)}, "segment")
+        yield sse_event(
+            {
+                "message_id": self.assistant_message_id,
+                "segment": MessageSegment.text(chunk),
+            },
+            "segment",
+        )
 
     async def finalize(self) -> None:
         """

@@ -2,7 +2,7 @@
 
 from typing import ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, Field, RootModel
 
 from .....common.utils import without
 from .....models import Message, MessageBase, MessageSegmentType
@@ -13,12 +13,8 @@ class ConverseUserMessage(MessageBase):
 
     __hidden__: ClassVar[list[str]] = ["segments", "feedback_rating"]
 
-    model_config = ConfigDict(
-        fields={"segments": {"exclude": True}},
-    )
-
     def __init__(self, message: Message):
-        super().__init__(**without(message.dict(), "segments"))
+        super().__init__(**without(message.model_dump(), "segments"))
 
 
 class ConverseChatSegment(BaseModel):

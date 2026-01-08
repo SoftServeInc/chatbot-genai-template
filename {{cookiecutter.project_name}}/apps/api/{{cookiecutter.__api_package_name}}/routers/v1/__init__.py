@@ -8,6 +8,9 @@ from fastapi.responses import Response
 from ...app.schemas import responses
 from .chats.router import chats
 from .messages.router import messages
+{%- if cookiecutter.enable_rag %}
+from .rag_documents import rag_documents
+{%- endif %}
 from .terms.router import terms
 from .users.router import users
 
@@ -21,6 +24,9 @@ v1.include_router(users)
 v1.include_router(chats)
 v1.include_router(messages)
 v1.include_router(terms)
+{%- if cookiecutter.enable_rag %}
+v1.include_router(rag_documents)
+{%- endif %}
 
 
 @v1.get(

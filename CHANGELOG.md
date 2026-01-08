@@ -11,7 +11,16 @@
 
 ## Unreleased
 
-- **chore**: Add notes here for changes that will be included in the next release.
+## 2.1.0 - 2025-12-22
+
+- **feat(rag)**: Add full Retrieval-Augmented Generation support and update template. Introduce complete RAG functionality to the chatbot template. Key changes include:
+  - document upload/management endpoints,
+  - semantic search,
+  - RAG-enabled chat assistant and retriever components,
+  - RAG settings (replacing `enable_pgvector` with `enable_rag`),
+  - consolidated migrations,
+  - PostgreSQL image updated to pgvector 0.8.0 on PG17.
+  - Includes comprehensive documentation updates and test coverage.
 
 ## 2.0.0 - 2025-12-05
 

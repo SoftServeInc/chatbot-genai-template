@@ -70,7 +70,7 @@ Apart from the applications and libraries, the repository contains the configura
 {%- else -%}
 - [Docker](https://docs.docker.com/get-docker/) v21.0.0 or higher. Make sure you have a paid Docker subscription if you are using _Docker Desktop_ on MacOS or Windows.
 {%- endif %}
-- [Python](https://www.python.org/downloads/) v3.11.7. It is recommended (but not required) to use [pyenv](https://github.com/pyenv/pyenv) to manage Python versions.
+- [Python](https://www.python.org/downloads/) v3.13. It is recommended (but not required) to use [pyenv](https://github.com/pyenv/pyenv) to manage Python versions.
 {%- if cookiecutter.pip == "poetry" %}
 - [Poetry](https://python-poetry.org/docs/#installation) v1.6.1 or higher.
 {%- endif %}

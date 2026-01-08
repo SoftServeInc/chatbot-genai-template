@@ -7,7 +7,7 @@ to ensure they're available during test collection and module loading.
 
 DEFAULT_TEST_ENV = {
     # Database configuration
-    "DB_NAME": "postgres",
+    "DB_NAME": "{{ cookiecutter.database_name }}",
     "DB_USERNAME": "postgres",
     "DB_PASSWORD": "postgres",
     "DB_HOST": "localhost",

@@ -1,10 +1,11 @@
 """Chat message related models"""
 
 from enum import StrEnum
-from typing import TYPE_CHECKING, ClassVar, Literal, Self
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self
 from uuid import UUID
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from pydantic import field_validator
 from sqlalchemy.dialects.postgresql import ENUM as SQLEnum
 from sqlalchemy.dialects.postgresql import JSONB as SQL_JSONB
 from sqlmodel import Field as SQLField
@@ -86,6 +87,20 @@ class MessageBase(GenericResource):
     in_progress: bool = SQLField(default=False)
     feedback_rating: int = SQLField(default=0)
     feedback_comment: str = SQLField(default="", exclude=True, schema_extra={"hidden": True})
+
+    @field_validator("chat_id", mode="before")
+    @classmethod
+    def validate_chat_id(cls, v: Any) -> UUID:  # pylint: disable=no-self-argument
+        """Validate and convert chat_id to UUID"""
+        if isinstance(v, UUID):
+            return v
+        if isinstance(v, str):
+            try:
+                return UUID(v)
+            except ValueError as e:
+                raise ValueError(f"chat_id must be a valid UUID (Guid), got: {v}") from e
+        raise ValueError(f"chat_id must be a UUID or a valid UUID string, got: {type(v).__name__}")
+
 
     def _iter(self, *args, **kwargs):
         """Exclude the feedback rating from the serialized model if the role is a user"""

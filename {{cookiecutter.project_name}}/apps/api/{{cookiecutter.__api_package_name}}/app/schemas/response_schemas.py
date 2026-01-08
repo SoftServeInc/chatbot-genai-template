@@ -147,6 +147,6 @@ _schemas = {
 }
 
 
-def responses(*args: int):
+def responses(*args: int) -> dict[int, dict[str, Any]]:
     """Return a dictionary of error responses for the specified status codes."""
     return {code: _schemas[code] for code in args if code in _schemas}
