@@ -11,6 +11,8 @@
 
 ## Unreleased
 
+- **fix**: Add missing PromptTemplate import to conversation_assistant template.
+
 ## 2.1.0 - 2025-12-22
 
 - **feat(rag)**: Add full Retrieval-Augmented Generation support and update template. Introduce complete RAG functionality to the chatbot template. Key changes include:
